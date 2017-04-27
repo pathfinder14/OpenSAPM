@@ -1,7 +1,7 @@
 import argparse
 
 
-def parse_arg():
+def parse_args():
     """The function create parser to arguments"""
     parser = argparse.ArgumentParser()
     parser.add_argument("path_to_problem",
@@ -10,10 +10,15 @@ def parse_arg():
     return parser.parse_args()
 
 
-def get_dict_from_arguments():
-    """This function return a dictionary, that contains information about the problem"""
-    pass
-    #TODO : open user file and parse user data
+def get_dict_from_arguments(arguments):
+    """This function returns a dictionary, that contains information about the problem"""
+    with open(arguments.path_to_problem) as infile:
+        parametrs = {}
+        for line in infile:
+            tmp = line.split()
+            parametrs[tmp[0]] = tmp[1]
+    return parametrs
+
 
 def get_parametrs():
     arguments = parse_args()
