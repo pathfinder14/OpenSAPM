@@ -97,7 +97,7 @@ class Problem(object):
         initialize a property of env
         :return new property  
         """
-        return Environment_properties()
+        return environment_properties()
 
     def _produce_source_of_waves(type = None):
         """
