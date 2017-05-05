@@ -33,6 +33,8 @@ class Problem(object):
         self.params = params
         self._dimension = params['dimension']
         self._type = params['type']
+        self._rho = params['rho']
+        self.lambda_lame = params['lambda_lame']
         grid_size = 10
         self._model = _assemble_model()
         self._matrix = _get_matrix()
@@ -87,7 +89,7 @@ class Problem(object):
         Create a model
         :return model
         """
-        model = Model([self._dimension, self.type])
+        model = Model({"dimension" : self._dimension, "type" : self.type, "lambda_lame":self.lambda_lame, "rho": self.rho})
         return model
 
     def _get_method_of_solving(name_of_method):

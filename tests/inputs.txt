@@ -1,0 +1,4 @@
+dimension 1
+type acoustic
+method 
+lame 
