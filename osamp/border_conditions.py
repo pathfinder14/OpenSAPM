@@ -1,6 +1,3 @@
-
-
-# arr consists of ( sigma_x, u_x ). For reflection border_sigma_x = 0, border_u_x = -u_x.
 from grid import GridElement1d, Grid1d
 from methods import MethodNames
 
