@@ -53,38 +53,20 @@ class environment_properties(object):
         self.E = self.mu_lame * (3 * self.lambda_lame + 2 * self.mu_lame) / (self.lambda_lame + self.mu_lame)
 
 
-    def create_environment_for_seismic(self, x=1000, y=1000):
+    def create_environment(self, x=1000, y=1000):
         """
-                One of the main functions in class <Environment_properties> which returns the created environment field
-                for seismic task according to the pack of input parameters:
-                        (density, v_p, v_c) or (density, lambda_lame, mu_lame)
+        The main function in class <Environment_properties> which returns the created environment field
+            according to the pack of input parameters:
+                (density, v_p, v_c) or (density, lambda_lame, mu_lame)
 
-                Each element of returned <ndarray> contains list [v_p, v_s, density, lambda_lame, mu_lame]
-                        which will be used in further calculations
+        Each element of returned <ndarray> contains list [v_p, v_s, density, lambda_lame, mu_lame]
+                which will be used in further calculations
 
-                :param x:   Width
-                :param y:   Height
-                :return:    numpy.ndarray(shape=(x, y))
+        :param x:   Width
+        :param y:   Height
+        :return:    numpy.ndarray(shape=(x, y))
         """
         square = [self.v_p, self.v_s, self.density, self.lambda_lame, self.mu_lame]
-        field = np.ndarray(shape=(x, y), dtype=np.dtype(list))
-        field.fill(square)
-        return field
-
-    def create_environment_for_acoustic(self, x=1000, y=1000):
-        """
-                One of the main function in class <Environment_properties> which returns the created environment field
-                for acoustic task according to the pack of input parameters:
-                        (density, v_p) or (density, lambda_lame)
-
-                Each element of returned <ndarray> contains list [v_p, density, lambda_lame]
-                        which will be used in further calculations
-
-                :param x:   Width
-                :param y:   Height
-                :return:    numpy.ndarray(shape=(x, y))
-        """
-        square = [self.v_p, self.density, self.lambda_lame]
         field = np.ndarray(shape=(x, y), dtype=np.dtype(list))
         field.fill(square)
         return field
