@@ -33,6 +33,7 @@ class Problem(object):
         self.params = params
         self._dimension = params['dimension']
         self._type = params['type']
+        grid_size = 10
         self._model = _assemble_model()
         self._matrix = _get_matrix()
         self._method = _get_method_of_solving(params['method'])
@@ -40,10 +41,6 @@ class Problem(object):
         self._source = _produce_source_of_waves()
         self._border_conditions = generate_border_conditions(type_of_conditions)
         self._grid = _define_grid()
-        self._x = self.grid.get_x()
-        self._t = self.grid.get_t()
-        if self.dimension == 2
-            self._y = self.grid.get_y()
 
     @property
     def border_conditions(self):
@@ -71,7 +68,12 @@ class Problem(object):
 
 
     def _define_grid():
-    ''' Generate a grid/mesh to the problem'''    
+    ''' Generate a grid/mesh to the problem'''
+        grid_dim = ()
+        if self.dimension == 1
+            grid_dim = (grid_size, grid_size)
+        else:
+            grid_dim = (grid_size, grid_size, grid_size)
         return Grid()    
 
     def _get_matrix():

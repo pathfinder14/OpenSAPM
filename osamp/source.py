@@ -6,7 +6,7 @@ current contained in the variable source
 """
 
 class Source(object):
-    """docstring for Source"""
+    """This class is responsible for creating external sources of waves"""
     def __init__(self, type):
         super(Source, self).__init__()
         self._type = type
