@@ -1,4 +1,4 @@
-class METHOD_NAMES:
+class MethodNames:
     def __init__(self):
         pass
 
