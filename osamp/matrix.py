@@ -63,7 +63,7 @@ def get_eign_matrix(dim, type, param):
 
 
 def get_inv_eign_matrix(dim, type, param):
-        if type == 'acoustic':
+    if type == 'acoustic':
         if dim == 1:
             return get_acoustic1D_eign_matrix(param[0], param[1], param[2])
         else:
