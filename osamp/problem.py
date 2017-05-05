@@ -63,21 +63,23 @@ class Problem(object):
         return self._prop_env
 
     @property
-    def matrix
+    def matrix(self):
         return self._matrix
 
 
     def _define_grid():
-    ''' Generate a grid/mesh to the problem'''
+        """
+        Generate a grid/mesh to the problem
+        """
         grid_dim = ()
-        if self.dimension == 1
-            grid_dim = (grid_size, grid_size)
+        if self.dimension == 1:
+            return Grid1d()
         else:
             grid_dim = (grid_size, grid_size, grid_size)
         return Grid()    
 
     def _get_matrix():
-    ''' Get matrix for corresponding problem type '''
+        ''' Get matrix for corresponding problem type '''
         return self._model.matrix
 
     def _assemble_model():

@@ -1,4 +1,6 @@
+import environment_properties as env
 import matrix
+
 class Model(list_of_user_data):
     """
     Model is a class, that contains information about formulation the problem
@@ -7,14 +9,14 @@ class Model(list_of_user_data):
     
     """
     def __init__(self, arg):
-        super(Model, self).__init__()
         self.arg = arg
         self._type_eq = arg['type']
         self._dim = arg['dim']
         self._a_matrix = matrix.get_matrix(self.dim, self.type_eq)
         self._omega_matrix = matrix.get_eign_matrix(self.dim, self.type_eq)
         self._inverse_omega_matrix = matrix.get_inv_eign_matrix(self.dim, self.type_eq)
-        
+        self.env_prop = env.EnvironmentProperties(arg['rho'], arg['lambda_lame'], arg['mu_lame'], arg['v_p'], arg['v_s'])
+        self.
 
     @property
     def a_matrix(self):

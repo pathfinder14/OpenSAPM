@@ -1,3 +1,4 @@
+from problem import Problem
 class Solver(Problem):
     """
     Solver class for simulations. 

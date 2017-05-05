@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.neighbors import KNeighborsClassifier
 
 
-class environment_properties(object):
+class EnvironmentProperties(object):
 
     def __init__(self, density, lambda_lame=0, mu_lame=0, v_p=0, v_s=0):
         self.density = density
