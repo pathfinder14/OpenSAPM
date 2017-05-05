@@ -88,9 +88,3 @@ class environment_properties(object):
         field = np.ndarray(shape=(x, y), dtype=np.dtype(list))
         field.fill(square)
         return field
-
-
-# test = environment_properties(1000, lambda_lame=10, mu_lame=250000)
-# print(test.get_get_all_params())
-# field = test.create_environment()
-# print(field)
