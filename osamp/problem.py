@@ -1,3 +1,9 @@
+# coding=utf-8
+import grid
+import model
+import border_conditions
+import source
+
 class Problem(object):
     """
     Problem class is the completly form task with created parametrs.
@@ -6,8 +12,6 @@ class Problem(object):
     ndim - dimension 1 or 2
 
     _x, _t
-    
-    matrix - the matrix corresponding to system (will be contained in a model)
     
     grid - TODO
 
@@ -22,32 +26,30 @@ class Problem(object):
     ...    property of environment (will be contained in a model)
     
     border conditions
-
-
-
     """
-    def __init__(self, params = None):
 
+    GRID_SIZE = 10
+
+    def __init__(self, params = None):
         if params is None:
             params =  {}
         self.params = params
-        self._dimension = params['dimension']
+        self._dimension = int(params['dimension'])
         self._type = params['type']
-        grid_size = 10
-        self._model = _assemble_model()
-        self._matrix = _get_matrix()
-        self._method = _get_method_of_solving(params['method'])
-        self._prop_env = _get_property_of_environment()
-        self._source = _produce_source_of_waves()
-        self._border_conditions = generate_border_conditions(type_of_conditions)
-        self._grid = _define_grid()
+        self._rho = float(params['rho'])
+        self._lambda_lame = float(params['lambda_lame'])
+        self._model = self._assemble_model()
+        self._method = params['method']
+        self._source = self._produce_source_of_waves()
+        self._grid = self._define_grid()
+        print('Problem: ' + str(self))
 
     @property
     def border_conditions(self):
         return self._border_conditions
 
     @property
-    def dimension():
+    def dimension(self):
         return self._dimension
 
     @property
@@ -62,48 +64,49 @@ class Problem(object):
     def prop_env(self):
         return self._prop_env
 
-    @property
-    def matrix
-        return self._matrix
-
-
-    def _define_grid():
-    ''' Generate a grid/mesh to the problem'''
+    def _define_grid(self):
+        """
+        Generate a grid/mesh to the problem
+        """
         grid_dim = ()
-        if self.dimension == 1
-            grid_dim = (grid_size, grid_size)
+        if self._dimension == 1:
+            return grid.Grid((Problem.GRID_SIZE,Problem.GRID_SIZE))
         else:
-            grid_dim = (grid_size, grid_size, grid_size)
-        return Grid()    
+            grid_dim = (Problem.GRID_SIZE, Problem.GRID_SIZE, Problem.GRID_SIZE)
+            return grid.Grid2d()
 
-    def _get_matrix():
-    ''' Get matrix for corresponding problem type '''
-        return self._model.matrix
-
-    def _assemble_model():
+    def _assemble_model(self):
         """
         Create a model
         :return model
         """
-        model = Model([self._dimension, self.type])
-        return model
+        result_model = model.Model({
+            "dimension" : self._dimension,
+            "type" : self._type,
+            "lambda_lame": self._lambda_lame,
+            "rho": self._rho
+        })
+        return result_model
 
-    def _get_method_of_solving(name_of_method):
-        """
-        return one of the method to solve convection–diffusion equation 
-        """
-        return Method(name_of_method)
-
-    def _get_property_of_environment(): #TODO arguments for environment
-        """
-        initialize a property of env
-        :return new property  
-        """
-        return environment_properties()
-
-    def _produce_source_of_waves(type = None):
+    def _produce_source_of_waves(self, type = None):
         """
         Create a source of propagating waves
         :return Source
         """
-        return Source(type)
+        return source.Source(type)
+
+    def __str__(self):
+        result_srt = ''
+        result_srt += ' dimension: ' + str(self._dimension)
+        result_srt += ' type: ' + self._type
+        result_srt += ' rho: ' + str(self._rho)
+        result_srt += ' lambda_lame: ' + str(self._lambda_lame)
+        result_srt += ' model: ' + str(self._model)
+        # result_srt += 'method: ' + self._method
+        # result_srt += 'source: ' + self._source
+        # result_srt += 'grid: ' + self._grid
+        return result_srt
+
+
+
+

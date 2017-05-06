@@ -1,38 +1,22 @@
-class GridElement1d:
-    def __init__(self, sigma=0, velocity=0):
-        self.sigma = sigma
-        self.velocity = velocity
-
-    def set_value(self, sigma, velocity):
-        self.sigma = sigma
-        self.velocity = velocity
+import numpy as np
 
 
-class Grid1d:
-    def __init__(self, elements=None, dimension=0):
-        if elements is None:
-            elements = []
-        self.elements = elements  # list of GridElement1d
-        self.dimension = dimension
+class Grid(object):   
+    """Generate grid/mesh."""
+    def __init__(self, grid_dim_sizes):
+        self._dx = 1
+        self._dy = 1
+        self._dt = 1
+        self._grid = np.zeros(grid_dim_sizes, dtype=np.float64)
+        self.nt = grid_dim_sizes[0]
+        self.nx = grid_dim_sizes[1]
+        if len(grid_dim_sizes) > 2:
+            self.ny = grid_dim_sizes[2]
+            self.j_max = self.ny - 1
+        self.i_max = self.nx - 1
+        self.k_max = self.nt - 1
 
 
-class GridElement2d:
-    def __init__(self, sigma=None, velocity=None):  # [sigma_11, sigma_12, sigma_22], sigma_12=sigma_21
-        if velocity is None:
-            velocity = [0, 0]
-        if sigma is None:
-            sigma = [0, 0, 0]
-        self.sigma = sigma
-        self.velocity = velocity
-
-    def set_value(self, sigma, velocity):
-        self.sigma = sigma
-        self.velocity = velocity
-
-
-class Grid2d:
-    def __init__(self, elements=None, dimension=0):
-        if elements is None:
-            elements = [[0 for i in range(dimension)] for j in range(dimension)]
-        self.elements = elements  # list of GridElement1d
-        self.dimension = dimension
+    @property
+    def grid():
+        return self._grid

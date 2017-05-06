@@ -1,4 +1,4 @@
-from grid import GridElement1d, Grid1d
+
 
 class ConditionNames:
     def __init__(self):
@@ -6,7 +6,6 @@ class ConditionNames:
 
     REFLECTION_CONDITION = 'reflection'
     CYCLE_CONDITION = 'cycle'
-
 
 def border_condition_1d(grid, left, right):
     arr = grid.elements
@@ -46,3 +45,6 @@ def border_condition_1d(grid, left, right):
 
     return Grid1d(arrnew, len(arrnew))
     # And make a new grid from this.
+
+def border_condition_2d():
+    return '' # TODO
