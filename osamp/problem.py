@@ -70,7 +70,7 @@ class Problem(object):
         """
         grid_dim = ()
         if self._dimension == 1:
-            return grid.Grid1d()
+            return grid.Grid((Problem.GRID_SIZE,Problem.GRID_SIZE))
         else:
             grid_dim = (Problem.GRID_SIZE, Problem.GRID_SIZE, Problem.GRID_SIZE)
             return grid.Grid2d()
@@ -109,9 +109,4 @@ class Problem(object):
 
 
 
-# def _generate_border_conditions(self):
-#     if self._dimension == 1:
-#         return border_conditions.border_condition_1d(self._grid, TODO, TODO)
-#         # TODO: no idea what to pass as parameters cause method signature is not easily understandable
-#     elif self._dimension == 2:
-#         return border_conditions.border_condition_2d()
+

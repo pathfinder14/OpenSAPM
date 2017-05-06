@@ -1,5 +1,5 @@
 from problem import Problem
-from utils.сonvection_diffusion_equation_solution.kir import kir as method_of_solvings
+
 class Solver(Problem):
     """
     Solver class for simulations. 
@@ -10,6 +10,7 @@ class Solver(Problem):
         super(Solver, self).__init__()
         self.problem = Problem
         self.cfl = 0.1 #TODO change this parametrs to user's propertyies
+        self.dimension = problem.dimension
         problem = self.problem
         matrix_of_eigns = problem.model.lambda_matrix
         omega_matrix = problem.model.omega_matrix
@@ -23,5 +24,14 @@ class Solver(Problem):
         grid[0]
         for i in xrange(num_of_equation):
             #v = np.dot(omega_matrix, u)
-            v[i] = method_of_solvings(problem.grid.shape[0], problem.grid.shape[1], problem.grid, lambda_matrix[i], cfl, 1)
+            v[i] = kir(problem.grid.shape[0], problem.grid.shape[1], problem.grid, lambda_matrix[i], cfl, 1)
             u[i] = np.dot(inv_matrix, v[i])
+
+
+
+def _generate_border_conditions(self):
+    if self._dimension == 1:
+        return border_conditions.border_condition_1d(self._grid, TODO, TODO)
+        # TODO: no idea what to pass as parameters cause method signature is not easily understandable
+    elif self._dimension == 2:
+        return border_conditions.border_condition_2d()

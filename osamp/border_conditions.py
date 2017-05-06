@@ -1,5 +1,4 @@
 
-from grid import GridElement1d, Grid1d
 
 class ConditionNames:
     def __init__(self):
