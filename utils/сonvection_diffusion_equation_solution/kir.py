@@ -1,4 +1,4 @@
-
+"""Use numpy arrays and lists"""
 def kir(t_nods_quantity, x_nods_quantity, grid, transfer_velocity, time_step, x_step):
     sigma = transfer_velocity * time_step / x_step
     for n in range(1, t_nods_quantity - 1):

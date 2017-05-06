@@ -1,4 +1,5 @@
 #!/usr/bin/python
+"""Use standard python arrays"""
 def get_border_cond_for_beam_warming(row):
     return [-row[0]] + row
 
