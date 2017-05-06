@@ -1,7 +1,7 @@
 import environment_properties as env
 import matrix
 
-class Model(list_of_user_data):
+class Model(object):
     """
     Model is a class, that contains information about formulation the problem
     The main data in model: matrix and property of class

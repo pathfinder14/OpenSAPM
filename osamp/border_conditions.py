@@ -8,7 +8,6 @@ class ConditionNames:
     REFLECTION_CONDITION = 'reflection'
     CYCLE_CONDITION = 'cycle'
 
-
 def border_condition_1d(grid, left, right):
     arr = grid.elements
     arrnew = []
@@ -47,3 +46,6 @@ def border_condition_1d(grid, left, right):
 
     return Grid1d(arrnew, len(arrnew))
     # And make a new grid from this.
+
+def border_condition_2d():
+    return '' # TODO

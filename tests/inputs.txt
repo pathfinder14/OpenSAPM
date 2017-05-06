@@ -1,4 +1,5 @@
 dimension 1
 type acoustic
-method 
-lame 
+method test_method_name
+lambda_lame 100
+rho 200
