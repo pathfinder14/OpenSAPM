@@ -1,3 +1,4 @@
+import numpy as np
 class GridElement1d:
     def __init__(self, sigma=0, velocity=0):
         self.sigma = sigma

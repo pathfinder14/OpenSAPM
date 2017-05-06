@@ -21,6 +21,13 @@ class Model(object):
     def lambda_matrix(self):
         return self._lamda_matrix
 
+    @property
+    def omega_matrix(self):
+        return self._omega_matrix
+
+    @property
+    def inverse_omega_matrix(self):
+        return self._inverse_omega_matrix
 
     @property
     def type_problem(self):
