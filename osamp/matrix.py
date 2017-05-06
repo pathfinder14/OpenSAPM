@@ -21,25 +21,24 @@ def get_acoustic2D_eign_matrix(_k, _rho, n):
 def get_acoustic1D_matrix(_k, _rho):
     c1 = -np.sqrt(_k/_rho)
     c2 = np.sqrt(_k/_rho)
-    acoustic_matrix = np.diag(np.array([с1,c2]))
+    acoustic_matrix = np.diag(np.array([c1,c2]))
     return acoustic_matrix
 
 def get_acoustic1D_eign_matrix(_k, _rho, n):
     """ Retrun matrix of eigenvectors"""
-    return np.array([[-np.sqrt(_k*_rho), np.sqrt(_k*_rho)],[n, n]])
+    return np.array([[-np.sqrt(_k * _rho), np.sqrt(_k*_rho)], [n, n]])
 
 def get_acoustic1D_inv_eign_matrix(_k, _rho, n):
-    return np.array([-1/(2*np.sqrt(_k*_rho)),1/(2*n)], [1/(2*np.sqrt(_k*_rho)),1/(2*n)])
-    pass
+    return np.array([[-1 / (2 * np.sqrt(_k * _rho)), 1/(2 * n)], [1 / (2 * np.sqrt(_k * _rho)), 1/(2 * n)]])
 
 def get_matrix(dim, type, param):
     if type == 'acoustic':
         if dim == 1:
-            return get_acoustic1D_matrix(param[0], param[1], param[2])
+            return get_acoustic1D_matrix(param[0], param[1])
         else:
             return get_acoustic2D_matrix()
 
-    if type == 'seismic'
+    if type == 'seismic':
         if dim == 1:
             return
         else:
@@ -49,11 +48,12 @@ def get_matrix(dim, type, param):
 def get_eign_matrix(dim, type, param):
     if type == 'acoustic':
         if dim == 1:
-            return get_acoustic1D_eign_matrix(param[0], param[1], param[2])
+            # TODO: clarify what value should be passed as third parameter
+            return get_acoustic1D_eign_matrix(param[0], param[1], 1)
         else:
             return get_acoustic2D_eign_matrix()
 
-    if type == 'seismic'
+    if type == 'seismic':
         if dim == 1:
             return
         else:
@@ -63,11 +63,12 @@ def get_eign_matrix(dim, type, param):
 def get_inv_eign_matrix(dim, type, param):
     if type == 'acoustic':
         if dim == 1:
-            return get_acoustic1D_eign_matrix(param[0], param[1], param[2])
+            # TODO: clarify what value should be passed as third parameter
+            return get_acoustic1D_inv_eign_matrix(param[0], param[1], 1)
         else:
             return get_acoustic2D_eign_matrix()
 
-    if type == 'seismic'
+    if type == 'seismic':
         if dim == 1:
             return
         else:

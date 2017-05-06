@@ -15,6 +15,7 @@ class Grid1d:
             elements = []
         self.elements = elements  # list of GridElement1d
         self.dimension = dimension
+        print ('elements: ' + str(elements))
 
 
 class GridElement2d:

@@ -13,8 +13,6 @@ class Problem(object):
 
     _x, _t
     
-    matrix - the matrix corresponding to system (will be contained in a model)
-    
     grid - TODO
 
     sorces - the prameter, that presents the source of propagating waves
@@ -33,23 +31,18 @@ class Problem(object):
     GRID_SIZE = 10
 
     def __init__(self, params = None):
-
         if params is None:
             params =  {}
-
-        params_str = str(params)
-        print('Params: ' + params_str)
-
         self.params = params
-        self._dimension = params['dimension']
+        self._dimension = int(params['dimension'])
         self._type = params['type']
         self._rho = float(params['rho'])
         self._lambda_lame = float(params['lambda_lame'])
         self._model = self._assemble_model()
-        self._matrix = self._get_matrix()
         self._method = params['method']
         self._source = self._produce_source_of_waves()
         self._grid = self._define_grid()
+        print('Problem: ' + str(self))
 
     @property
     def border_conditions(self):
@@ -71,10 +64,6 @@ class Problem(object):
     def prop_env(self):
         return self._prop_env
 
-    @property
-    def matrix(self):
-        return self._matrix
-
     def _define_grid(self):
         """
         Generate a grid/mesh to the problem
@@ -93,15 +82,11 @@ class Problem(object):
         """
         result_model = model.Model({
             "dimension" : self._dimension,
-            "type" : self.type,
-            "lambda_lame": self.lambda_lame,
-            "rho": self.rho
+            "type" : self._type,
+            "lambda_lame": self._lambda_lame,
+            "rho": self._rho
         })
         return result_model
-
-    def _get_matrix(self):
-        ''' Get matrix for corresponding problem type '''
-        return self._model.matrix
 
     def _produce_source_of_waves(self, type = None):
         """
@@ -109,6 +94,20 @@ class Problem(object):
         :return Source
         """
         return source.Source(type)
+
+    def __str__(self):
+        result_srt = ''
+        result_srt += ' dimension: ' + str(self._dimension)
+        result_srt += ' type: ' + self._type
+        result_srt += ' rho: ' + str(self._rho)
+        result_srt += ' lambda_lame: ' + str(self._lambda_lame)
+        result_srt += ' model: ' + str(self._model)
+        # result_srt += 'method: ' + self._method
+        # result_srt += 'source: ' + self._source
+        # result_srt += 'grid: ' + self._grid
+        return result_srt
+
+
 
 # def _generate_border_conditions(self):
 #     if self._dimension == 1:

@@ -1,7 +1,4 @@
-import matplotlib as mplot
 import numpy as np
-from sklearn.neighbors import KNeighborsClassifier
-
 
 class EnvironmentProperties(object):
 
