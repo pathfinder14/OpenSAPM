@@ -12,6 +12,7 @@ class Model:
         self.arg = arg
         self._type_problem = arg['type']
         self._dim = arg['dimension']
+        self.lame = arg['lambda_lame']
         self._lamda_matrix = \
             matrix.get_matrix(self._dim, self._type_problem, [arg['lambda_lame'], arg['rho']])
         self._omega_matrix = \

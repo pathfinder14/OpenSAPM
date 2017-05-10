@@ -20,3 +20,5 @@ class Grid(object):
     @property
     def grid():
         return self._grid
+
+        
