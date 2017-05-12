@@ -14,6 +14,7 @@ class Solver:
     cfl - Kur's number c*tau/h
     """
     def __init__(self, Problem):
+        print('Problem: ' + str(Problem))
         self.cfl = 0.1 #TODO change this parametrs to user's propertyies
         self._dimension = Problem.dimension
         self.problem = Problem

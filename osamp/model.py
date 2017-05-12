@@ -8,18 +8,19 @@ class Model:
     Model contain matrix of the acoustic/seismic equations
     
     """
-    def __init__(self, arg):
-        self.arg = arg
-        self._type_problem = arg['type']
-        self._dim = arg['dimension']
-        self.lame = arg['lambda_lame']
+    def __init__(self, config):
+        self.arg = config
+        self._type_problem = config['type']
+        self._dim = config['dimension']
+        self.lame = config['elasticity_quotient']
         self._lamda_matrix = \
-            matrix.get_matrix(self._dim, self._type_problem, [arg['lambda_lame'], arg['rho']])
+            matrix.get_matrix(self._dim, self._type_problem, [config['elasticity_quotient'], config['rho']])
         self._omega_matrix = \
-            matrix.get_eign_matrix(self._dim, self._type_problem, [arg['lambda_lame'], arg['rho']])
+            matrix.get_eign_matrix(self._dim, self._type_problem, [config['elasticity_quotient'], config['rho']])
         self._inverse_omega_matrix = \
-            matrix.get_inv_eign_matrix(self._dim, self._type_problem, [arg['lambda_lame'], arg['rho']])
-        self.env_prop = env.EnvironmentProperties(arg['rho'], arg['lambda_lame']) # arg['mu_lame'], arg['v_p'], arg['v_s']
+            matrix.get_inv_eign_matrix(self._dim, self._type_problem, [config['elasticity_quotient'], config['rho']])
+        self.env_prop = env.EnvironmentProperties(config['rho'], config['elasticity_quotient'])
+        # arg['mu_lame'], arg['v_p'], arg['v_s']
 
     @property
     def lambda_matrix(self):
@@ -43,7 +44,7 @@ class Model:
 
     def __str__(self):
         result_srt = ''
-        result_srt += ' lamda_matrix: ' + str(self._lamda_matrix)
-        result_srt += ' omega_matrix: ' + str(self._omega_matrix)
-        result_srt += ' inverse_omega_matrix: ' + str(self._inverse_omega_matrix)
+        result_srt += '\nlamda_matrix: ' + str(self._lamda_matrix)
+        result_srt += '\nomega_matrix: ' + str(self._omega_matrix)
+        result_srt += '\ninverse_omega_matrix: ' + str(self._inverse_omega_matrix)
         return result_srt

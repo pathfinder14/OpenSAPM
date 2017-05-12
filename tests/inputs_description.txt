@@ -1,0 +1,8 @@
+parameter:             | values(separated with ' '):
+------------------------------------------------------
+dimension              | 1 2
+type                   | seismic acoustic
+method                 | kir
+elasticity_quotient    |
+rho                    |
+source                 | point spherical

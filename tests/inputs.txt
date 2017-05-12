@@ -1,5 +1,6 @@
 dimension 1
-type acoustic
-method test_method_name
-lambda_lame 100
+type seismic
+method kir
+elasticity_quotient 100
 rho 200
+source spherical
