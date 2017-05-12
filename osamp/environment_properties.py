@@ -75,9 +75,9 @@ class environment_properties(object):
         """
                 One of the main function in class <Environment_properties> which returns the created environment field
                 for acoustic task according to the pack of input parameters:
-                        (density, v_p) or (density, lambda_lame)
+                        (density, v_p) or (density, k)
 
-                Each element of returned <ndarray> contains list [v_p, density, lambda_lame]
+                Each element of returned <ndarray> contains list [v_p, density, k]
                         which will be used in further calculations
 
                 :param x:   Width
