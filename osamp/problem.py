@@ -42,7 +42,6 @@ class Problem(object):
         self._method = params['method']
         self._source = self._produce_source_of_waves()
         self._grid = self._define_grid()
-        print('Problem: ' + str(self))
 
     @property
     def border_conditions(self):
