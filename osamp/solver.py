@@ -1,7 +1,8 @@
 # coding=utf-8
 import numpy as np
 import importlib.util
-spec = importlib.util.spec_from_file_location("kir", "../utils/сonvection_diffusion_equation_solution/kir.py")
+import source
+spec = importlib.util.spec_from_file_location("kir", "../utils/convection_diffusion_equation_solution/kir.py")
 kir = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(kir)
 
@@ -10,30 +11,60 @@ class Solver:
     Solver class for simulations. 
     Time axis is labed as t, spaces ax, ay
     
+    cfl - Kur's number c*tau/h
     """
     def __init__(self, Problem):
         self.cfl = 0.1 #TODO change this parametrs to user's propertyies
         self._dimension = Problem.dimension
+        self.problem = Problem
         matrix_of_eigns = Problem.model.lambda_matrix
         omega_matrix = Problem.model.omega_matrix
         inv_matrix = Problem.model.inverse_omega_matrix
-        grid = Problem._grid._grid
+        self._grid = Problem._grid._grid
         #solve dv/dt=a dv/dx
         #TODO: find information v = omega*u
         num_of_equation = len(matrix_of_eigns)
         v = np.zeros(num_of_equation)
-        u = np.zeros(num_of_equation)
-        # TODO
-        for i in range(num_of_equation):
-            #v = np.dot(omega_matrix, u)
-            new_grid = kir.kir(grid.shape[0], grid.shape[1], grid, matrix_of_eigns[i][i], self.cfl, 1)
-            for j in range(len(new_grid)):
-                u[j] = np.dot(inv_matrix, new_grid[j])
+        u = []
+        self.c = Problem.model.lame
+        # TODO generating source 
+        self.solve_1D_acoustic()
 
 
 
 
-def _generate_border_conditions(self):
+    def solve_1D_acoustic(self):
+        grid = self._grid
+        source_of_grid = source.Source("point")
+        time_step = self.cfl*self.problem._grid._dx/self.c
+        matrix_of_eigns = self.problem.model.lambda_matrix
+        omega_matrix = self.problem.model.omega_matrix
+        inv_matrix = self.problem.model.inverse_omega_matrix
+        generate_border_conditions(grid)
+        for t in range(1, grid.shape[0]):
+            source_of_grid.update_source_in_grid(grid[t-1])
+            for k in range(len(grid[t-1])):#recieve Riman's invariant
+                grid[t-1][k] = np.dot(omega_matrix, grid[t-1][k])
+            grid[t] = (kir.kir(grid.shape[0], grid.shape[1], grid[t-1], matrix_of_eigns, time_step, 1))
+            for k in range(len(grid[t-1])):#recieve Riman's invariant
+                grid[t-1][k] = np.dot(inv_matrix, grid[t-1][k])
+            #should i return to previous value on lvl t-1 ?
+        print(grid) #TODO return grid to postprocess
+
+    def solve_1D_seismic(self):
+        pass
+
+    def solve_2D_acoustic(self):
+        pass
+
+    def solve_2D_seismic(self):
+        pass
+
+
+def generate_border_conditions(grid):
+    for i in range(len(grid[0])):
+        grid[0][i] = [1,1]
+    return 
     if self._dimension == 1:
         return border_conditions.border_condition_1d(self._grid, TODO, TODO)
         # TODO: no idea what to pass as parameters cause method signature is not easily understandable
