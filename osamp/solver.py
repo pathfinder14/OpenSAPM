@@ -2,7 +2,7 @@
 import numpy as np
 import importlib.util
 import source
-spec = importlib.util.spec_from_file_location("kir", "../utils/сonvection_diffusion_equation_solution/kir.py")
+spec = importlib.util.spec_from_file_location("kir", "../utils/convection_diffusion_equation_solution/kir.py")
 kir = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(kir)
 
@@ -49,7 +49,17 @@ class Solver:
             for k in range(len(grid[t-1])):#recieve Riman's invariant
                 grid[t-1][k] = np.dot(inv_matrix, grid[t-1][k])
             #should i return to previous value on lvl t-1 ?
-        print(grid)
+        print(grid) #TODO return grid to postprocess
+
+    def solve_1D_seismic(self):
+        pass
+
+    def solve_2D_acoustic(self):
+        pass
+
+    def solve_2D_seismic(self):
+        pass
+
 
 def generate_border_conditions(grid):
     for i in range(len(grid[0])):
