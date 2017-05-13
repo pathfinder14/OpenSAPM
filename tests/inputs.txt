@@ -1,8 +1,8 @@
 dimension 1
 type acoustic
-method kir
-elasticity_quotient 100
+method beam_warming
+elasticity_quotient 1
 x_velocity 0
 y_velocity 0
-rho 200
+rho 20
 source spherical

@@ -4,9 +4,16 @@ import importlib.util
 import matplotlib.pyplot as plt
 import source
 import border_conditions
+
+#TODO chsnge type of imort module
 spec = importlib.util.spec_from_file_location("kir", "../utils/convection_diffusion_equation_solution/kir.py")
 kir = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(kir)
+
+spec = importlib.util.spec_from_file_location("kir", "../utils/convection_diffusion_equation_solution/beam_warming.py")
+beam_warming = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(beam_warming)
+
 
 class Solver:
     """
@@ -33,16 +40,20 @@ class Solver:
         grid = self._grid
         source_of_grid = self.source
         time_step = self.cfl*self.problem._grid._dx/self.x_velocity
+        spatial_step = 1
         matrix_of_eigns = self.problem.model.lambda_matrix
         omega_matrix = self.problem.model.omega_matrix
         inv_matrix = self.problem.model.inverse_omega_matrix
+
         for t in range(1, grid.shape[0]):
             source_of_grid.update_source_in_grid(grid[t-1])
             self._generate_border_conditions(grid[t-1], self.problem._type)
             for k in range(len(grid[t-1])):#recieve Riman's invariant
                 grid[t-1][k] = np.dot(omega_matrix, grid[t-1][k])
             if(self.problem._method == 'kir'):
-                grid[t] = kir.kir(grid.shape[1], grid[t-1], matrix_of_eigns, time_step, 1)
+                grid[t] = kir.kir(grid.shape[1], grid[t-1], matrix_of_eigns, time_step, spatial_step)
+            if(self.problem._method == 'beam_warming'):
+                grid[t] = beam_warming.beam_warming(matrix_of_eigns, time_step, spatial_step, grid[t-1])
             else:
                 raise Exception('Unknown method name: ' + self.problem._method)
             for k in range(len(grid[t-1])):#recieve Riman's invariant
