@@ -1,8 +1,9 @@
 import numpy as np
 
 
-class Grid(object):   
+class Grid():
     """Generate grid/mesh."""
+    #TODO remove time part from grid
     def __init__(self, grid_dim_sizes):
         self._dx = 1
         self._dy = 1
@@ -18,5 +19,7 @@ class Grid(object):
 
 
     @property
-    def grid():
+    def grid(self):
         return self._grid
+
+        

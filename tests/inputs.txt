@@ -1,5 +1,8 @@
 dimension 1
 type acoustic
-method test_method_name
-lambda_lame 100
-rho 200
+method beam_warming
+elasticity_quotient 1
+x_velocity 0
+y_velocity 0
+rho 20
+source spherical
