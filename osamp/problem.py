@@ -36,7 +36,7 @@ class Problem(object):
         self.params = params
         self._dimension = int(params['dimension'])
         self._type = params['type']
-        self._rho = float(params['rho'])
+        self._density = float(params['density'])
         self._elasticity_quotient = float(params['elasticity_quotient'])
         self._x_velocity = float(params['x_velocity'])
         self._y_velocity = float(params['y_velocity'])
@@ -71,13 +71,11 @@ class Problem(object):
         """
         Generate a grid/mesh to the problem
         """
-        grid_dim = ()
         if self._dimension == 1:
             return grid.Grid((Problem.GRID_SIZE, Problem.GRID_SIZE, self.dimension +1))
         else:
-            # TODO create Grid2d class
-            grid_dim = (Problem.GRID_SIZE, Problem.GRID_SIZE, Problem.GRID_SIZE)
-            return grid.Grid2d()
+            # TODO create Grid2d class and replace the following with it
+            return grid.Grid((Problem.GRID_SIZE, Problem.GRID_SIZE, self.dimension +1))
 
     def _assemble_model(self):
         """
@@ -88,7 +86,7 @@ class Problem(object):
             "dimension" : self._dimension,
             "type" : self._type,
             "elasticity_quotient": self._elasticity_quotient,
-            "rho": self._rho,
+            "density": self._density,
             "x_velocity": self._x_velocity,
             "y_velocity": self._y_velocity
         })
@@ -107,7 +105,7 @@ class Problem(object):
         result_srt = '{'
         result_srt += '\ndimension: ' + str(self._dimension)
         result_srt += '\ntype: ' + self._type
-        result_srt += '\nrho: ' + str(self._rho)
+        result_srt += '\ndensity: ' + str(self._density)
         result_srt += '\nelasticity_quotient: ' + str(self._elasticity_quotient)
         result_srt += '\nsource: ' + str(self._source)
         result_srt += '\nmethod: ' + self._method

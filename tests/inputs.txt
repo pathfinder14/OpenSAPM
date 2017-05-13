@@ -4,5 +4,5 @@ method kir
 elasticity_quotient 100
 x_velocity 0
 y_velocity 0
-rho 200
+density 200
 source spherical

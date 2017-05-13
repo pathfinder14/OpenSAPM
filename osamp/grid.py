@@ -8,7 +8,7 @@ class Grid():
         self._dx = 1
         self._dy = 1
         self._dt = 1
-        self._grid = np.zeros(grid_dim_sizes, dtype=np.float64)
+        self._grid = np.zeros(grid_dim_sizes, dtype = np.float64)
         self.nt = grid_dim_sizes[0]
         self.nx = grid_dim_sizes[1]
         if len(grid_dim_sizes) > 2:
@@ -22,4 +22,3 @@ class Grid():
     def grid(self):
         return self._grid
 
-        
