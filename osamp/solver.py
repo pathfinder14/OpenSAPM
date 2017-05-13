@@ -43,6 +43,8 @@ class Solver:
                 grid[t-1][k] = np.dot(omega_matrix, grid[t-1][k])
             if(self.problem._method == 'kir'):
                 grid[t] = kir.kir(grid.shape[1], grid[t-1], matrix_of_eigns, time_step, 1)
+            else:
+                raise Exception('Unknown method name: ' + self.problem._method)
             for k in range(len(grid[t-1])):#recieve Riman's invariant
                 grid[t-1][k] = np.dot(inv_matrix, grid[t-1][k])
             #should i return to previous value on lvl t-1 ?
