@@ -1,5 +1,5 @@
 dimension 1
-type seismic
+type acoustic
 method kir
 elasticity_quotient 100
 rho 200
