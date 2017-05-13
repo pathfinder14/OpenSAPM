@@ -1,19 +1,17 @@
 import numpy as np
 
-# TODO implement method properly (now it is a copy of analogous acoustic method)
-def get_seismic1d_matrix(_k, _rho):
-    c1 = -np.sqrt(_k/_rho)
-    c2 = np.sqrt(_k/_rho)
-    return np.diag(np.array([c1, 0, c2]))
+def get_seismic1d_matrix(_mu, _rho):
+    c_p = np.sqrt(_mu/_rho)
+    return np.diag(np.array([c_p, -c_p]))
 
-# TODO implement method properly (now it is a copy of analogous acoustic method)
-def get_seismic1d_eign_matrix(_k, _rho, n):
+def get_seismic1d_eign_matrix(_mu, _rho):
     """ Retrun matrix of eigenvectors"""
-    return np.array([[-np.sqrt(_k * _rho), np.sqrt(_k*_rho)], [n, n]])
+    c_p = np.sqrt(_mu/_rho)
+    return np.array([[1/c_p, 1/c_p], [1, 1]])
 
-# TODO implement method properly (now it is a copy of analogous acoustic method)
-def get_seismic1d_inv_eign_matrix(_k, _rho, n):
-    return np.array([[-1 / (2 * np.sqrt(_k * _rho)), 1/(2 * n)], [1 / (2 * np.sqrt(_k * _rho)), 1/(2 * n)]])
+def get_seismic1d_inv_eign_matrix(_mu, _rho):
+    c_p = np.sqrt(_mu/_rho)
+    return np.array([[-0.5*c_p, 0.5], [-0.5*c_p, 0.5]])
 
 def get_seismic2d_matrix(_lambda, _mu, _rho):
     c_p = np.sqrt((_lambda + 2*_mu)/_rho)
@@ -52,7 +50,7 @@ def get_matrix(dim, type, param):
         if dim == 1:
             return get_seismic1d_matrix(param[0], param[1])
         else:
-            return get_seismic2d_matrix()
+            return get_seismic2d_matrix(param[0], param[1])
 
 def get_eign_matrix(dim, type, param):
     if type == 'acoustic':
@@ -64,7 +62,7 @@ def get_eign_matrix(dim, type, param):
 
     if type == 'seismic':
         if dim == 1:
-            return get_seismic1d_eign_matrix(param[0], param[1], 1)
+            return get_seismic1d_eign_matrix(param[0], param[1])
         else:
             return get_seismic2d_matrix()
 
@@ -79,6 +77,6 @@ def get_inv_eign_matrix(dim, type, param):
 
     if type == 'seismic':
         if dim == 1:
-            return get_seismic1d_inv_eign_matrix(param[0], param[1], 1)
+            return get_seismic1d_inv_eign_matrix(param[0], param[1])
         else:
             return get_seismic2d_matrix()

@@ -43,7 +43,7 @@ class Problem(object):
         self._model = self._assemble_model()
         self._method = params['method']
         self._source = params['source']
-        self._source = self._produce_source_of_waves()
+        self.source = self._produce_source_of_waves()
         self._grid = self._define_grid()
         # print('Problem: ' + str(self))
 
