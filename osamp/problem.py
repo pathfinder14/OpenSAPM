@@ -100,17 +100,17 @@ class Problem(object):
         return source.Source(self._source)
 
     def __str__(self):
-        result_srt = ''
-        result_srt += 'dimension: ' + str(self._dimension)
+        result_srt = '{'
+        result_srt += '\ndimension: ' + str(self._dimension)
         result_srt += '\ntype: ' + self._type
         result_srt += '\nrho: ' + str(self._rho)
         result_srt += '\nelasticity_quotient: ' + str(self._elasticity_quotient)
         result_srt += '\nmodel: {' + str(self._model) + '\n}'
         result_srt += '\nsource: ' + str(self._source)
-    # result_srt += 'method: ' + self._method
+        # result_srt += 'method: ' + self._method
         # result_srt += 'source: ' + self._source
         # result_srt += 'grid: ' + self._grid
-        return result_srt
+        return result_srt + '\n}'
 
 
 
