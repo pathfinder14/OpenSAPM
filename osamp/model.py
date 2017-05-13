@@ -12,15 +12,15 @@ class Model:
         self.arg = config
         self._type_problem = config['type']
         self._dim = config['dimension']
-        self.lame = config['elasticity_quotient']
+        self._elasticity_quotient = config['elasticity_quotient']
         self._lamda_matrix = \
             matrix.get_matrix(self._dim, self._type_problem, [config['elasticity_quotient'], config['rho']])
         self._omega_matrix = \
             matrix.get_eign_matrix(self._dim, self._type_problem, [config['elasticity_quotient'], config['rho']])
         self._inverse_omega_matrix = \
             matrix.get_inv_eign_matrix(self._dim, self._type_problem, [config['elasticity_quotient'], config['rho']])
-        self.env_prop = env.EnvironmentProperties(config['rho'], config['elasticity_quotient'])
-        # arg['mu_lame'], arg['v_p'], arg['v_s']
+        self.env_prop = env.EnvironmentProperties(
+            config['rho'], config['elasticity_quotient'], 0, config['x_velocity'], config['x_velocity'])
 
     @property
     def lambda_matrix(self):

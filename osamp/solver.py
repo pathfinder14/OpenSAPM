@@ -17,8 +17,7 @@ class Solver:
     TODO In this task grid - it's a time slice
     """
     def __init__(self, Problem):
-        print('Problem: ' + str(Problem))
-        self.cfl = 0.1 #TODO change this parametrs to user's propertyies
+        self.cfl = 0.1 # TODO change this parametrs to user's propertyies
         self._dimension = Problem.dimension
         self.problem = Problem
         matrix_of_eigns = Problem.model.lambda_matrix
@@ -31,16 +30,14 @@ class Solver:
         num_of_equation = len(matrix_of_eigns)
         v = np.zeros(num_of_equation)
         u = []
-        self.c = Problem.model.lame
-        # TODO generating source 
-
-
-
+        self.x_velocity = Problem.model.env_prop.x_velocity
+        self.solve_1D_acoustic()
+        # TODO generating source
 
     def solve_1D_acoustic(self):
         grid = self._grid
         source_of_grid = source.Source("point")
-        time_step = self.cfl*self.problem._grid._dx/self.c
+        time_step = self.cfl*self.problem._grid._dx/self.x_velocity
         matrix_of_eigns = self.problem.model.lambda_matrix
         omega_matrix = self.problem.model.omega_matrix
         inv_matrix = self.problem.model.inverse_omega_matrix
@@ -49,13 +46,12 @@ class Solver:
             self._generate_border_conditions(grid[t-1], 'acoustic')
             for k in range(len(grid[t-1])):#recieve Riman's invariant
                 grid[t-1][k] = np.dot(omega_matrix, grid[t-1][k])
-            grid[t] = (kir.kir(grid.shape[1], grid[t-1], matrix_of_eigns, time_step, 1))
+            if(self.problem._method == 'kir'):
+                grid[t] = kir.kir(grid.shape[1], grid[t-1], matrix_of_eigns, time_step, 1)
             for k in range(len(grid[t-1])):#recieve Riman's invariant
                 grid[t-1][k] = np.dot(inv_matrix, grid[t-1][k])
             #should i return to previous value on lvl t-1 ?
         print(grid) #TODO return grid to postprocess
-        draw1D(grid[0][0],grid[0][-1], 1, grid[0][0], grid[-1][0], time_step, grid)
-
 
     def solve_1D_seismic(self):
         pass
