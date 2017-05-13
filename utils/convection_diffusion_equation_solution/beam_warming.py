@@ -3,6 +3,7 @@ import numpy as np
 
 def get_border_cond_for_beam_warming(row):
     return [-row[0]] + row
+
 """The function returns the next grid (numpy array) with zero left border condition"""
 def beam_warming(transfer_velocity, tau, h, grid):
     ext_grid = np.array(get_border_cond_for_beam_warming(grid.tolist()))
