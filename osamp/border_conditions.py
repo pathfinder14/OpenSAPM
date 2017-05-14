@@ -1,3 +1,4 @@
+import numpy as np
 class ConditionNames:
     def __init__(self):
         pass
@@ -35,11 +36,11 @@ def border_condition_1d(grid, type_of_task, border_left, border_right):
 
 
 def border_condition_1d_acoustic(grid, border_left, border_right):
-    grid_new = []
+    grid_new = np.zeros((2,2))
     # Check left border.
     if border_left == ConditionNames.REFLECTION_CONDITION:
-        for i in [2, 1, 0]: # todo add dependence on method
-            grid_new.append([-grid[i][p], -grid[i][v]])
+        for i in [1, 0]: # todo add dependence on method
+            grid_new[i] = -grid[i]#[-grid[i][p], -grid[i][v]]
 
     # elif border_left == ConditionNames.CYCLE_CONDITION:
     #     grid_copy[1][p] = grid[len(grid) - 1][p]
@@ -58,11 +59,11 @@ def border_condition_1d_acoustic(grid, border_left, border_right):
     #     # else:
     #     # todo add new methods
 
-    grid_new.extend(grid[:])
+    ext_grid = np.concatenate((grid_new,grid), axis = 0)
     # Check right border.
     if border_right == ConditionNames.REFLECTION_CONDITION:
-        for i in [0, 1, 2]:
-            grid_new.append([-grid[len(grid) - (i + 1)][p], -grid[len(grid) - (i + 1)][v]])
+        for i in [1, 0]:
+            grid_new[i] = [-grid[len(grid) - (i + 1)][p], -grid[len(grid) - (i + 1)][v]]
 
     # elif border_right == ConditionNames.CYCLE_CONDITION:
     #     grid_copy[len(grid) - 1][p] = grid[1][p]
@@ -80,8 +81,9 @@ def border_condition_1d_acoustic(grid, border_left, border_right):
     #
     #     # else:
     #     # todo add new methods
-
-    return grid_new
+    #grid_new = np.array(grid_new)
+    ext_grid = np.concatenate((grid, grid_new), axis = 0)
+    return ext_grid
 
 
 def border_condition_1d_seismic(arr, border_left, border_right):
