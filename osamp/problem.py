@@ -37,6 +37,7 @@ class Problem(object):
         self._dimension = int(params['dimension'])
         self._type = params['type']
         self._density = float(params['density'])
+        self._mu_lame = float(params['mu_lame'])
         self._elasticity_quotient = float(params['elasticity_quotient'])
         self._x_velocity = float(params['x_velocity'])
         self._y_velocity = float(params['y_velocity'])
@@ -86,6 +87,7 @@ class Problem(object):
             "dimension" : self._dimension,
             "type" : self._type,
             "elasticity_quotient": self._elasticity_quotient,
+            "mu_lame": self._mu_lame,
             "density": self._density,
             "x_velocity": self._x_velocity,
             "y_velocity": self._y_velocity

@@ -14,7 +14,8 @@ class Model:
         self._dim = config['dimension']
         self._elasticity_quotient = config['elasticity_quotient']
         self.env_prop = env.EnvironmentProperties(
-            config['density'], config['elasticity_quotient'], 0, config['x_velocity'], config['x_velocity'])
+            config['density'], config['elasticity_quotient'], config['mu_lame'],
+            config['x_velocity'], config['x_velocity'])
         self._lamda_matrix = \
             matrix.get_matrix(self._dim, self._type_problem, self.env_prop.elasticity_quotient,
                               self.env_prop.density, self.env_prop.mu_lame)

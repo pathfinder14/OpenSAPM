@@ -1,8 +1,6 @@
 # coding=utf-8
 import numpy as np
 import importlib.util
-import matplotlib.pyplot as plt
-import source
 import border_conditions
 
 #TODO chsnge type of imort module

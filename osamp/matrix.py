@@ -56,7 +56,7 @@ def get_eign_matrix(dim, type, elasticity_quotient, density, mu_lame):
     if type == 'acoustic':
         if dim == 1:
             # TODO: clarify what value should be passed as the third parameter
-            return get_acoustic1D_eign_matrix(elasticity_quotient, density, [1, 1, 1])
+            return get_acoustic1D_eign_matrix(elasticity_quotient, density, 1)
         else:
             return get_acoustic2D_eign_matrix(elasticity_quotient, density, [1, 1, 1])
 
@@ -72,7 +72,7 @@ def get_inv_eign_matrix(dim, type, elasticity_quotient, density, mu_lame):
     if type == 'acoustic':
         if dim == 1:
             # TODO: clarify what value should be passed as third parameter
-            return get_acoustic1D_inv_eign_matrix(elasticity_quotient, density, [1, 1, 1])
+            return get_acoustic1D_inv_eign_matrix(elasticity_quotient, density, 1)
         else:
             # TODO: implement method get_acoustic2d_inv_eign_matrix and replace the following with it
             return get_acoustic2D_eign_matrix(elasticity_quotient, density, [1, 1, 1])

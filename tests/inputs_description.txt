@@ -4,7 +4,10 @@ dimension              | 1 2
 type                   | seismic acoustic
 method                 | kir
 elasticity_quotient    | 0 if x_velocity or y_velocity are equal to 0
+mu_lame                | 0 for acoustic
+density                |
 x_velocity             | 0 if elasticity_quotient is not equal to 0
 y_velocity             | 0 if elasticity_quotient is not equal to 0
-density                    |
+density                |
 source                 | point spherical
+buffering_step         | number of iterations before solution part will be
