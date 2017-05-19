@@ -73,7 +73,7 @@ class Problem(object):
         """
         grid_dim = ()
         if self._dimension == 1:
-            return grid.Grid((Problem.GRID_SIZE, Problem.GRID_SIZE, self.dimension +1))
+            return grid.Grid((Problem.GRID_SIZE, self.dimension + 1))
         else:
             # TODO create Grid2d class
             grid_dim = (Problem.GRID_SIZE, Problem.GRID_SIZE, Problem.GRID_SIZE)
