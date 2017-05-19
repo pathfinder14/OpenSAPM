@@ -7,30 +7,45 @@ class environment_properties(object):
 
     def __init__(self, density, lambda_lame=0, mu_lame=0, v_p=0, v_s=0):
         self.density = density
-        self.lambda_lame = lambda_lame
-        self.mu_lame = mu_lame
-        self.v_p = v_p
-        self.v_s = v_s
+        self.lambda_lame = 0
+        self.mu_lame = 0
+        self.v_p = 0
+        self.v_s = 0
         self.E = 0
         self.nu_puass = 0
-        if v_p == 0 and v_s == 0:
-            self.__calculate_Puass_and_E()
-            self.__calculate_speeds()
-        else:
-            self.__calculate_Lame_and_Puass_and_E()
+        if v_p == 0 and v_s == 0 and mu_lame == 0 and lambda_lame != 0:
+            self.set_dens_and_lame_for_acoustic(density, lambda_lame)
+        if v_p == 0 and v_s == 0 and mu_lame != 0 and lambda_lame != 0:
+            self.set_dens_and_lame_for_seismic(density, lambda_lame, mu_lame)
+        if v_p != 0 and v_s == 0 and mu_lame == 0 and lambda_lame == 0:
+            self.set_dens_and_speeds_for_acoustic(density, v_p)
+        if v_p != 0 and v_s != 0 and mu_lame == 0 and lambda_lame == 0:
+            self.set_dens_and_speeds_for_seismic(density, v_p, v_s)
 
-    def set_dens_and_lame(self, density, lambda_lame, mu_lame):
+
+
+    def set_dens_and_lame_for_seismic(self, density, lambda_lame, mu_lame):
         self.density = density
         self.lambda_lame = lambda_lame
         self.mu_lame = mu_lame
         self.__calculate_Puass_and_E()
         self.__calculate_speeds()
 
-    def set_dens_and_speeds(self, density, v_p, v_s):
+    def set_dens_and_lame_for_acoustic(self, density, lambda_lame):
+        self.density = density
+        self.lambda_lame = lambda_lame
+        self.v_p = (lambda_lame/density) ** 0.5
+
+    def set_dens_and_speeds_for_seismic(self, density, v_p, v_s):
         self.density = density
         self.v_p = v_p
         self.v_s = v_s
         self.__calculate_Lame_and_Puass_and_E()
+
+    def set_dens_and_speeds_for_acoustic(self, density, v_p):
+        self.density = density
+        self.v_p = v_p
+        self.lambda_lame = (v_p**2) * density
 
     def get_get_all_params(self):
         params = {'Density = ': self.density, 'Lambda_Lame = ': self.lambda_lame, 'Mu_Lame = ': self.mu_lame,
@@ -50,7 +65,8 @@ class environment_properties(object):
 
     def __calculate_Puass_and_E(self):
         self.nu_puass = self.lambda_lame / (2 * (self.lambda_lame + self.mu_lame))
-        self.E = self.mu_lame * (3 * self.lambda_lame + 2 * self.mu_lame) / (self.lambda_lame + self.mu_lame)
+        # self.E = self.mu_lame * (3 * self.lambda_lame + 2 * self.mu_lame) / (self.lambda_lame + self.mu_lame)
+        self.E = self.lambda_lame * (1 + self.nu_puass) * (1 - 2*self.nu_puass)/(self.nu_puass)
 
 
     def create_environment_for_seismic(self, x=1000, y=1000):
@@ -88,3 +104,12 @@ class environment_properties(object):
         field = np.ndarray(shape=(x, y), dtype=np.dtype(list))
         field.fill(square)
         return field
+
+
+# density = 1000
+# v_p = 200
+# v_s = 400
+# mu_lame = 56
+# lambda_lame = 123
+# props = environment_properties(density, lambda_lame)
+# print(props.get_get_all_params())
