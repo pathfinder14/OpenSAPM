@@ -72,7 +72,7 @@ class Problem(object):
         Generate a grid/mesh to the problem
         """
         if self._dimension == 1:
-            return grid.Grid((Problem.GRID_SIZE, Problem.GRID_SIZE, self.dimension +1))
+            return grid.Grid((Problem.GRID_SIZE, self.dimension + 1))
         else:
             # TODO create Grid2d class and replace the following with it
             return grid.Grid((Problem.GRID_SIZE, Problem.GRID_SIZE, self.dimension +1))

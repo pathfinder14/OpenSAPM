@@ -1,3 +1,6 @@
+import numpy as np
+
+
 class ConditionNames:
     def __init__(self):
         pass
@@ -5,6 +8,7 @@ class ConditionNames:
     REFLECTION_CONDITION = 'reflection'
     CYCLE_CONDITION = 'cycle'
     ABSORBING_CONDITION = 'absorb'
+    APPLIED_FORCE_CONDITION = 'applied_force'
 
 
 class ProblemTypes:
@@ -15,82 +19,105 @@ class ProblemTypes:
     SEISMIC = 'seismic'
 
 
-p = 0 # index of pressure (?) in values array
-v = 1 # index of velocity in values array
+class SolverMethods:
+    def __init__(self):
+        pass
+
+    BIOCOMPACT = 'biocompact'
+    LAX_WENDROFF = 'lax_wendroff'
+    BEAM_WARMING = 'beam_warming'
+    KIR = 'kir'
+    TVD = 'tvd'
+
+    cells_for_method = {BIOCOMPACT: (3, 1), LAX_WENDROFF: (3, 3), BEAM_WARMING: (3, 3), KIR: (3, 3), TVD: (1, 1)}
+
+    @classmethod
+    def get_cells_amount_left(cls, method_name):
+        return cls.cells_for_method[method_name][0]
+
+    @classmethod
+    def get_cells_amount_right(cls, method_name):
+        return SolverMethods.cells_for_method[method_name][1]
 
 
-def border_condition_1d(grid, type_of_task, border_left, border_right):
+p = 0  # index of pressure (?) in values array
+v = 1  # index of velocity in values array
+
+
+def border_condition_1d(grid, type_of_task, border_left, border_right, method_name, force_left=0, force_right=0):
     """
     Applies border conditions to 'grid' array and returns updated version of it.
-    Needs to have 'type_of_task' specified by a string from 'ProblemTypes' class.
+    Needs to have 'type_of_task' and 'method_name' specified by a string from 'ProblemTypes' class.
 
     Additional arguments:
         - 'border_left'  - a string from 'ConditionNames' class, specifying type of left border;
         - 'border_right' - a string from 'ConditionNames' class, specifying type of right border;
+        - 'force_left' - applied force at the left border;
+        - 'force_right' - applied force at the right border
     """
     if type_of_task == ProblemTypes.ACOUSTIC:
-        return border_condition_1d_acoustic(grid, border_left, border_right)
+        return border_condition_1d_acoustic(grid, border_left, border_right, method_name, force_left, force_right)
     elif type_of_task == ProblemTypes.SEISMIC:
-        return border_condition_1d_seismic(grid, border_left, border_right)
+        return border_condition_1d_seismic(grid, border_left, border_right, method_name, force_left, force_right)
 
 
-def border_condition_1d_acoustic(grid, border_left, border_right):
-    grid_copy = grid[:]
+def border_condition_1d_acoustic(grid, border_left, border_right, method_name, force_left=0, force_right=0):
+    cells_left = SolverMethods.get_cells_amount_left(method_name)
+    cells_right = SolverMethods.get_cells_amount_right(method_name)
+
+    grid_new = np.zeros((cells_left, 2))
 
     # Check left border.
-    if border_left == ConditionNames.REFLECTION_CONDITION:
-        grid_copy[0][p] = -grid[0][p]
-        grid_copy[0][v] = -grid[0][v]
 
-        grid_copy[1][p] = -grid[1][p]
-        grid_copy[1][v] = -grid[1][v]
+    if border_left == ConditionNames.REFLECTION_CONDITION:
+        for i in range(cells_left - 1, -1, -1):
+            grid_new[i][p] = grid[cells_left - 1 - i][p]
+            grid_new[i][v] = -grid[cells_left - 1 - i][v]
 
     elif border_left == ConditionNames.CYCLE_CONDITION:
-        grid_copy[1][p] = grid[len(grid) - 1][p]
-        grid_copy[1][v] = grid[len(grid) - 1][v]
-
-        grid_copy[0][p] = grid[len(grid) - 2][p]
-        grid_copy[0][v] = grid[len(grid) - 2][v]
-
+        for i in range(cells_left - 1, -1, -1):
+            grid_new[i] = grid[len(grid) - cells_left + i]
+    #
     elif border_left == ConditionNames.ABSORBING_CONDITION:
-        grid_copy[1][p] = 0
-        grid_copy[1][v] = 0
+        for i in range(cells_left - 1, -1, -1):
+            grid_new[i] = grid[cells_left - 1 - i]
 
-        grid_copy[0][p] = 0
-        grid_copy[0][v] = 0
+    elif border_left == ConditionNames.APPLIED_FORCE_CONDITION:
+        for i in range(cells_left - 1, -1, -1):
+            grid_new[i][v] = grid[cells_left - 1 - i][v]
+            grid_new[i][p] = 2 * force_left - grid[cells_left - 1 - i][p]
 
-        # else:
-        # todo add new methods
+    ext_grid = np.concatenate((grid_new, grid), axis=0)
+
+    grid_new = np.zeros((cells_right, 2))
 
     # Check right border.
     if border_right == ConditionNames.REFLECTION_CONDITION:
-        grid_copy[len(grid) - 1][p] = -grid[len(grid) - 1][p]
-        grid_copy[len(grid) - 1][v] = -grid[len(grid) - 1][v]
-
-        grid_copy[len(grid) - 2][p] = -grid[len(grid) - 2][p]
-        grid_copy[len(grid) - 2][v] = -grid[len(grid) - 2][v]
+        for i in range(cells_right - 1, -1, -1):
+            grid_new[i][p] = grid[len(grid) - 1 - i][p]
+            grid_new[i][v] = -grid[len(grid) - 1 - i][v]
 
     elif border_right == ConditionNames.CYCLE_CONDITION:
-        grid_copy[len(grid) - 1][p] = grid[1][p]
-        grid_copy[len(grid) - 1][v] = grid[1][v]
-
-        grid_copy[len(grid) - 2][p] = grid[0][p]
-        grid_copy[len(grid) - 2][v] = grid[0][v]
+        for i in range(cells_right - 1, -1, -1):
+            grid_new[i] = grid[i]
 
     elif border_right == ConditionNames.ABSORBING_CONDITION:
-        grid_copy[len(grid) - 1][p] = 0
-        grid_copy[len(grid) - 1][v] = 0
+        for i in range(cells_right - 1, -1, -1):
+            grid_new[i] = grid[len(grid) - 1 - i]
 
-        grid_copy[len(grid) - 2][p] = 0
-        grid_copy[len(grid) - 2][v] = 0
+    elif border_right == ConditionNames.APPLIED_FORCE_CONDITION:
+        for i in range(cells_right - 1, -1, -1):
+            grid_new[i][v] = grid[len(grid) - 1 - i][v]
+            grid_new[i][p] = 2 * force_right - grid[len(grid) - 1 - i][p]
 
-        # else:
-        # todo add new methods
-
-    return grid_copy
+    ext_grid = np.concatenate((ext_grid, grid_new), axis=0)
+    return ext_grid
 
 
-def border_condition_1d_seismic(arr, border_left, border_right):
+def border_condition_1d_seismic(arr, border_left, border_right, method_name, force_left, force_right):
     # for now seismic and acoustic border conditions do the same thing, but it's not the rule.
     # fixme
-    return border_condition_1d_acoustic(arr, border_left, border_right)
+    return border_condition_1d_acoustic(arr, border_left, border_right, method_name, force_left, force_right)
+
+
+# print border_condition_1d([[0, 1], [1, 2], [2, 3], [4, 5], [5, 6]], ProblemTypes.ACOUSTIC, ConditionNames.APPLIED_FORCE_CONDITION, ConditionNames.APPLIED_FORCE_CONDITION, SolverMethods.BEAM_WARMING)
