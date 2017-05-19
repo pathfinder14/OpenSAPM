@@ -10,4 +10,4 @@ x_velocity             | 0 if elasticity_quotient is not equal to 0
 y_velocity             | 0 if elasticity_quotient is not equal to 0
 density                |
 source                 | point spherical
-buffering_step         | number of iterations before solution part will be
+buffering_step         | number of iterations before part of the solution is written to buffer file
