@@ -68,7 +68,7 @@ def bicompactMethod(a,tau,h,x0,x1):
 	if (a==0):
 		x1 = x0
 
-	return x1
+	return x1[1:x1.size-1]
 
 # tests
 
@@ -81,14 +81,14 @@ def bicompactMethod(a,tau,h,x0,x1):
 # x1[8]=9
 # x0 = np.arange(0,9,h)
 
-# a=1
-# tau=1
-# h=1
-# x1 = np.arange(0,10,h)
-# for i in range(x1.size):
-# 	x1[i] = 0
-# x0 = np.arange(0,10,h)
+a=1
+tau=1
+h=1
+x1 = np.arange(0,10,h)
+for i in range(x1.size):
+	x1[i] = 0
+x0 = np.arange(0,10,h)
 
-# x1 = bicompactMethod(a,tau,h,x0,x1)
-# print(x1)
-# print(x0)
+x1 = bicompactMethod(a,tau,h,x0,x1)
+print(x1)
+print(x0)
