@@ -1,11 +1,11 @@
 import matplotlib as mplot
 import numpy as np
-from sklearn.neighbors import KNeighborsClassifier
-
+from utils.environment_properties_analyzers import visual_analyzer as va
 
 class environment_properties(object):
 
-    def __init__(self, density, lambda_lame=0, mu_lame=0, v_p=0, v_s=0):
+    def __init__(self, params, density=0, lambda_lame=0, mu_lame=0, v_p=0, v_s=0):
+        self.params = params
         self.density = density
         self.lambda_lame = 0
         self.mu_lame = 0
@@ -80,14 +80,14 @@ class environment_properties(object):
 
                 :param x:   Width
                 :param y:   Height
-                :return:    numpy.ndarray(shape=(x, y))
+                :return field:    numpy.ndarray(shape=(x, y))
         """
         square = [self.v_p, self.v_s, self.density, self.lambda_lame, self.mu_lame]
         field = np.ndarray(shape=(x, y), dtype=np.dtype(list))
         field.fill(square)
         return field
 
-    def create_environment_for_acoustic(self, x=1000, y=1000):
+    def create_environment_for_acoustic(self, x=100, y=100):
         """
                 One of the main function in class <Environment_properties> which returns the created environment field
                 for acoustic task according to the pack of input parameters:
@@ -98,18 +98,49 @@ class environment_properties(object):
 
                 :param x:   Width
                 :param y:   Height
-                :return:    numpy.ndarray(shape=(x, y))
+                :return field:    numpy.ndarray(shape=(x, y))
         """
         square = [self.v_p, self.density, self.lambda_lame]
         field = np.ndarray(shape=(x, y), dtype=np.dtype(list))
         field.fill(square)
         return field
 
+    def create_environment_from_image(self, image_path):
+        """
+                        One of the main function in class <Environment_properties> which returns the created environment field
+                        gathered from the picture with describes the environment
+                        with proper parameters for seismic task for each
+                        pixel<->(density, lambda_lame, mu_lame)
+                        or pixel<->(density, v_p, v_c) or correspondingly for acoustic task :
+                        pixel<->(density, v_p) or pixel<->(density, k)
 
-# density = 1000
-# v_p = 200
-# v_s = 400
-# mu_lame = 56
-# lambda_lame = 123
-# props = environment_properties(density, lambda_lame)
-# print(props.get_get_all_params())
+                        Each element of returned <array> contains corresponding list with parameters:
+                        [density, lambda_lame, mu_lame, v_p, v_s] for seismic and
+                        [density=0, lambda_lame=0, v_p=0] for acoustic
+
+                        :param image_path: The relative path to the image, which describes the environment
+                        :return field:    numpy.ndarray(shape=(height, length)); each element of array contains properties of environment
+                """
+        picture_parser = va.visual_analyzer(image_path, self.params)
+        field = picture_parser.create_field()
+        return field
+
+
+# # density = 1000
+# # v_p = 200
+# # v_s = 400
+# # mu_lame = 56
+# # lambda_lame = 0
+# # props = environment_properties(density, lambda_lame, mu_lame)
+# # field = props.create_environment_for_acoustic()
+# # print(field.shape)
+#
+# image_path = "three_col.jpg"
+# params = {(254, 242, 0) : [1, 2, 3]}
+# properties = environment_properties(params=params)
+# field = properties.create_environment_from_image(image_path)
+# print(type(field))
+# print(field[663][1626])
+#
+# # buf = tuple(map(tuple, image[0][0]))
+# # print(buf[0])
