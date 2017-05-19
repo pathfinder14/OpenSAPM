@@ -47,11 +47,13 @@ v = 1  # index of velocity in values array
 def border_condition_1d(grid, type_of_task, border_left, border_right, method_name, force_left=0, force_right=0):
     """
     Applies border conditions to 'grid' array and returns updated version of it.
-    Needs to have 'type_of_task' specified by a string from 'ProblemTypes' class.
+    Needs to have 'type_of_task' and 'method_name' specified by a string from 'ProblemTypes' class.
 
     Additional arguments:
         - 'border_left'  - a string from 'ConditionNames' class, specifying type of left border;
         - 'border_right' - a string from 'ConditionNames' class, specifying type of right border;
+        - 'force_left' - applied force at the left border;
+        - 'force_right' - applied force at the right border
     """
     if type_of_task == ProblemTypes.ACOUSTIC:
         return border_condition_1d_acoustic(grid, border_left, border_right, method_name, force_left, force_right)
@@ -118,4 +120,4 @@ def border_condition_1d_seismic(arr, border_left, border_right, method_name, for
     return border_condition_1d_acoustic(arr, border_left, border_right, method_name, force_left, force_right)
 
 
-    # print border_condition_1d([[0, 1], [1, 2], [2, 3], [4, 5], [5, 6]], ProblemTypes.ACOUSTIC, ConditionNames.APPLIED_FORCE_CONDITION, ConditionNames.APPLIED_FORCE_CONDITION, SolverMethods.BEAM_WARMING)
+# print border_condition_1d([[0, 1], [1, 2], [2, 3], [4, 5], [5, 6]], ProblemTypes.ACOUSTIC, ConditionNames.APPLIED_FORCE_CONDITION, ConditionNames.APPLIED_FORCE_CONDITION, SolverMethods.BEAM_WARMING)
