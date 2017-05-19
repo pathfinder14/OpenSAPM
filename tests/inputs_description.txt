@@ -6,5 +6,5 @@ method                 | kir
 elasticity_quotient    | 0 if x_velocity or y_velocity are equal to 0
 x_velocity             | 0 if elasticity_quotient is not equal to 0
 y_velocity             | 0 if elasticity_quotient is not equal to 0
-rho                    |
+density                    |
 source                 | point spherical
