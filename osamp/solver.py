@@ -85,7 +85,7 @@ class Solver:
                 grid_next_t[k] = np.dot(inv_matrix, grid_next_t[k]) 
             result_grid[i] = grid_next_t
         #print(result_grid) #TODO return grid to postprocess
-        postprocess.do_postprocess(result_grid, float(self.buffering_step)/10, -300, 300, "acoustic", time_step)
+        postprocess.do_postprocess(result_grid, float(self.buffering_step), -300, 300, "acoustic", time_step)
         #TODO add saving to file every N time steps
 
 

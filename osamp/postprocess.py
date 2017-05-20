@@ -22,17 +22,17 @@ def draw1DSlice(solution, t_slice, x_start, x_end, legend, solution_max_value):
     for label in ylabels:
         label.set_fontsize(40)
     #Устанавливаем границы отображения по x,f(x). 
-    plt.ylim(-3/2*solution_max_value, 3/2*solution_max_value)
+    plt.ylim(-3/2 * solution_max_value, 3/2 * solution_max_value)
     plt.xlim(x[0],x[-1])
         
     #Устанавливаем легенду на графике, включаем отображение сетки.
     plt.title(legend + ' plot, '  + 't = ' + str(t_slice) + 's', fontsize = 50) 
     plt.xlabel('x', fontsize = 40)
-    plt.ylabel(legend+'(x)',fontsize = 40)
+    plt.ylabel(legend+'(x)', fontsize = 40)
     plt.grid(True)
     
     plt.plot(x, solution, "--",linewidth=5)
-    plt.savefig("img/"+str(t_slice)+"s.png") # - если рисовать мувик, будет сохранять .png
+    plt.savefig('img' + os.sep + str(t_slice)+ 's.png' ) # - если рисовать мувик, будет сохранять .png
     #plt.show() - если нужно отображать, не будет сохранять
 
 
@@ -44,7 +44,7 @@ def draw1DSlice(solution, t_slice, x_start, x_end, legend, solution_max_value):
 def draw1DMovie(solution, t_filming_step, x_start, x_end, legend, t_grid_step):
 
     #Удаляем файлы из директории img\ перед рисование мультика.
-    files = glob.glob('img/*')
+    files = glob.glob('img' + os.sep + '*')
     for f in files:
         os.remove(f)
         
@@ -57,11 +57,11 @@ def draw1DMovie(solution, t_filming_step, x_start, x_end, legend, t_grid_step):
 
     #Рисуем гифку из содержимого папки img\, сохраняем ее туда же.      
     images = []
-    filenames = sorted(fn for fn in os.listdir(path='img/') if fn.endswith('.png'))
+    filenames = sorted(fn for fn in os.listdir(path='img' + os.sep) if fn.endswith('.png'))
     for filename in filenames:
-        tmp = imageio.imread('img/' + filename)
+        tmp = imageio.imread('img' + os.sep + filename)
         images.append(tmp)
-    imageio.mimsave('img/movie.gif', images, duration = 0.1)
+    imageio.mimsave('img' + os.sep + 'movie.gif', images, duration = 0.1)
     
 
 def do_postprocess(solution, t_filming_step, x_start, x_end, legend, t_grid_step):
