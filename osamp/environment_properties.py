@@ -1,16 +1,16 @@
-import matplotlib as mplot
 import numpy as np
 from utils.environment_properties_analyzers import visual_analyzer as va
 
 class environment_properties(object):
 
-    def __init__(self, params, density=0, lambda_lame=0, mu_lame=0, v_p=0, v_s=0):
-        self.params = params
+    def __init__(self, params, density = 0, lambda_lame=0, mu_lame=0, v_p=0, v_s=0):
+        self.init_params = dict(params)
+        self.params = dict(params)
         self.density = density
-        self.lambda_lame = 0
-        self.mu_lame = 0
-        self.v_p = 0
-        self.v_s = 0
+        self.lambda_lame = lambda_lame
+        self.mu_lame = mu_lame
+        self.v_p = v_p
+        self.v_s = v_s
         self.E = 0
         self.nu_puass = 0
         if v_p == 0 and v_s == 0 and mu_lame == 0 and lambda_lame != 0:
@@ -23,6 +23,17 @@ class environment_properties(object):
             self.set_dens_and_speeds_for_seismic(density, v_p, v_s)
 
 
+    def set_params_for_acoustic_using_v_p(self):
+        self.__calculate_params_for_acoustic_task_v_p()
+
+    def set_params_for_acoustic_using_k(self):
+        self.__calculate_params_for_acoustic_task_k()
+
+    def set_params_for_seismic_using_lame(self):
+        self.__calculate_params_for_seismic_task_vp_vs()
+
+    def set_params_for_seismic_using_speeds(self):
+        self.__calculate_params_for_seismic_task_lame()
 
     def set_dens_and_lame_for_seismic(self, density, lambda_lame, mu_lame):
         self.density = density
@@ -52,6 +63,52 @@ class environment_properties(object):
                   'v_p = ': self.v_p, 'v_s = ': self.v_s,
                   'E = ': self.E, 'nu_puass = ': self.nu_puass}
         return params
+
+    def __calculate_params_for_acoustic_task_v_p(self):
+        for buf_color in self.init_params.keys():
+            init_params = self.init_params.get(buf_color)
+            density = init_params[0]
+            v_p = init_params[1]
+            lambda_lame = self.__calculate_lambda_lame(density, v_p)
+            self.params.update({buf_color: [density, lambda_lame, v_p]})
+
+    def __calculate_params_for_acoustic_task_k(self):
+        for buf_color in self.init_params.keys():
+            init_params = self.init_params.get(buf_color)
+            density = init_params[0]
+            lambda_lame = init_params[1]
+            v_p = self.__calculate_v_p(density, lambda_lame)
+            self.params.update({buf_color: [density, lambda_lame, v_p]})
+
+    def __calculate_lambda_lame(self, density, v_p):
+        lambda_lame = (v_p ** 2) * density
+        return lambda_lame
+
+    def __calculate_v_p(self, density, lambda_lame):
+        v_p = (lambda_lame/density) ** 0.5
+        return v_p
+
+    def __calculate_params_for_seismic_task_vp_vs(self):
+        for buf_color in self.init_params.keys():
+            init_params = self.init_params.get(buf_color)
+            density = init_params[0]
+            v_p = init_params[1]
+            v_s = init_params[2]
+            self.set_dens_and_speeds_for_seismic(density, v_p, v_s)
+            mu_lame = self.mu_lame
+            lambda_lame = self.lambda_lame
+            self.params.update({buf_color: [density, lambda_lame, mu_lame, v_p, v_s]})
+
+    def __calculate_params_for_seismic_task_lame(self):
+        for buf_color in self.init_params.keys():
+            init_params = self.init_params.get(buf_color)
+            density = init_params[0]
+            lambda_lame = init_params[1]
+            mu_lame = init_params[2]
+            self.set_dens_and_lame_for_seismic(density, lambda_lame, mu_lame)
+            v_p = self.v_p
+            v_s = self.v_s
+            self.params.update({buf_color: [density, lambda_lame, mu_lame, v_p, v_s]})
 
     def __calculate_Lame_and_Puass_and_E(self):
         self.mu_lame = self.v_s ** 2 * self.density
@@ -135,12 +192,12 @@ class environment_properties(object):
 # # field = props.create_environment_for_acoustic()
 # # print(field.shape)
 #
-# image_path = "three_col.jpg"
-# params = {(254, 242, 0) : [1, 2, 3]}
-# properties = environment_properties(params=params)
-# field = properties.create_environment_from_image(image_path)
-# print(type(field))
-# print(field[663][1626])
-#
-# # buf = tuple(map(tuple, image[0][0]))
-# # print(buf[0])
+image_path = "three_col.jpg"
+params = {(254, 242, 0) : [1, 200, 30]}
+properties = environment_properties(params=params)
+properties.set_params_for_seismic_using_lame()
+field = properties.create_environment_from_image(image_path)
+print(field[663][1626])
+
+# buf = tuple(map(tuple, image[0][0]))
+# print(buf[0])
