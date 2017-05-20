@@ -1,16 +1,16 @@
 import numpy as np
 import importlib.util
-import utils.environment_properties_analyzers.visual_analyzer as va
 
 spec = importlib.util.spec_from_file_location("visual_analyzer", "../utils/environment_properties_analyzers/visual_analyzer.py")
 visual_analyzer = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(visual_analyzer)
 
-class EnvironmentProperties(object):
+class EnvironmentProperties:
 
-    def __init__(self, img_creating_parameters, density = 0, lambda_lame=0, mu_lame=0, x_velocity=0, y_velocity=0):
-        self.init_params = dict(img_creating_parameters)
-        self.img_creating_parameters = dict(img_creating_parameters)
+    def __init__(self, density = 0, lambda_lame=0, mu_lame=0, x_velocity=0, y_velocity=0, img_creating_parameters=None):
+        # Uncomment only whet it will be needed
+        # self.init_params = dict(img_creating_parameters)
+        # self.img_creating_parameters = dict(img_creating_parameters)
         self.density = density
         self.lambda_lame = lambda_lame
         self.elasticity_quotient = lambda_lame
@@ -185,7 +185,7 @@ class EnvironmentProperties(object):
                         :param image_path: The relative path to the image, which describes the environment
                         :return field:    numpy.ndarray(shape=(height, length)); each element of array contains properties of environment
                 """
-        picture_parser = va.visual_analyzer(image_path, self.img_creating_parameters)
+        picture_parser = visual_analyzer._parse_picture(image_path, self.img_creating_parameters)
         field = picture_parser.create_field()
         return field
 
@@ -199,12 +199,12 @@ class EnvironmentProperties(object):
 # # field = props.create_environment_for_acoustic()
 # # print(field.shape)
 #
-image_path = "three_col.jpg"
-params = {(254, 242, 0): [1, 200, 30]}
-properties = EnvironmentProperties(img_creating_parameters=params)
-properties.set_params_for_seismic_using_lame()
-field = properties.create_environment_from_image(image_path)
-print(field[663][1626])
+# image_path = "three_col.jpg"
+# params = {(254, 242, 0): [1, 200, 30]}
+# properties = EnvironmentProperties(img_creating_parameters=params)
+# properties.set_params_for_seismic_using_lame()
+# field = properties.create_environment_from_image(image_path)
+# print(field[663][1626])
 
 # buf = tuple(map(tuple, image[0][0]))
 # print(buf[0])
