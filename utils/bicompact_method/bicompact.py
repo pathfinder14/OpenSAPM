@@ -8,7 +8,7 @@ x0 - начальное условие t=0 (numpy array)
 x1 - следующий слой с заданным граничным условием на левом или на правом конце (numpy array)
 Возвращаемое значение: Следующий слой (x1) - numpy array
 '''
-def bicompactMethod(a,tau,h,x0,x1):
+def bicompact_method(a,tau,h,x0,x1):
 
 	# Так как работаем с целыми узлами - увеличиваем шаг вдвое
 	h=2*h
@@ -43,9 +43,6 @@ def bicompactMethod(a,tau,h,x0,x1):
 		size = x0.size-1
 		# В данном случае итерируемся, начиная с правого края
 		for j in range((x0.size-1)//2):
-			print(x1)
-			print(x0)
-			print()
 			M = np.array([[1/6-a*r,2/3],
 						 [a*r-1/4,-2*r*a]])
 			V = np.array([1/6*(x0[size-2*j-2]+x0[size-2*j]+4*x0[size-2*j-1])+(-r*a-1/6)*x1[size-2*j],
@@ -68,7 +65,7 @@ def bicompactMethod(a,tau,h,x0,x1):
 	if (a==0):
 		x1 = x0
 
-	return x1[1:x1.size-1]
+	return x1
 
 # tests
 
@@ -81,14 +78,14 @@ def bicompactMethod(a,tau,h,x0,x1):
 # x1[8]=9
 # x0 = np.arange(0,9,h)
 
-a=1
-tau=1
-h=1
-x1 = np.arange(0,10,h)
-for i in range(x1.size):
-	x1[i] = 0
-x0 = np.arange(0,10,h)
+# a=1
+# tau=1
+# h=1
+# x1 = np.arange(0,10,h)
+# for i in range(x1.size):
+# 	x1[i] = 0
+# x0 = np.arange(0,10,h)
 
-x1 = bicompactMethod(a,tau,h,x0,x1)
-print(x1)
-print(x0)
+# x1 = bicompactMethod(a,tau,h,x0,x1)
+# print(x1)
+# print(x0)
