@@ -1,0 +1,11 @@
+dimension 1
+type acoustic
+method beam_warming
+elasticity_quotient 1
+mu_lame 0
+density 100
+x_velocity 0
+y_velocity 0
+rho 20
+source spherical
+buffering_step 100
