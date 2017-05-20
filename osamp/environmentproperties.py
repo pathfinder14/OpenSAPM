@@ -1,7 +1,7 @@
 import numpy as np
 from utils.environment_properties_analyzers import visual_analyzer as va
 
-class environment_properties(object):
+class EnvironmentProperties(object):
 
     def __init__(self, img_creating_parameters, density = 0, lambda_lame=0, mu_lame=0, x_velocity=0, y_velocity=0):
         self.init_params = dict(img_creating_parameters)
@@ -194,7 +194,7 @@ class environment_properties(object):
 #
 image_path = "three_col.jpg"
 params = {(254, 242, 0) : [1, 200, 30]}
-properties = environment_properties(img_creating_parameters=params)
+properties = EnvironmentProperties(img_creating_parameters=params)
 properties.set_params_for_seismic_using_lame()
 field = properties.create_environment_from_image(image_path)
 print(field[663][1626])
