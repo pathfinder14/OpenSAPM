@@ -2,7 +2,7 @@
 import numpy as np
 import importlib.util
 import border_conditions
-
+import postprocess
 #TODO chsnge type of imort module
 spec = importlib.util.spec_from_file_location("kir", "../utils/convection_diffusion_equation_solution/kir.py")
 kir = importlib.util.module_from_spec(spec)
@@ -84,7 +84,8 @@ class Solver:
             for k in range(len(grid_next_t)):#recieve Riman's invariant
                 grid_next_t[k] = np.dot(inv_matrix, grid_next_t[k]) 
             result_grid[i] = grid_next_t
-        print(result_grid) #TODO return grid to postprocess
+        #print(result_grid) #TODO return grid to postprocess
+        postprocess.do_postprocess(result_grid, float(self.buffering_step)/10, -300, 300, "acoustic", time_step)
         #TODO add saving to file every N time steps
 
 
