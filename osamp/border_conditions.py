@@ -23,13 +23,13 @@ class SolverMethods:
     def __init__(self):
         pass
 
-    BIOCOMPACT = 'biocompact'
+    BIOCOMPACT = 'bicompact'
     LAX_WENDROFF = 'lax_wendroff'
     BEAM_WARMING = 'beam_warming'
     KIR = 'kir'
     TVD = 'tvd'
 
-    cells_for_method = {BIOCOMPACT: (3, 1), LAX_WENDROFF: (3, 3), BEAM_WARMING: (3, 3), KIR: (3, 3), TVD: (1, 1)}
+    cells_for_method = {BIOCOMPACT: (1, 1), LAX_WENDROFF: (3, 3), BEAM_WARMING: (1, 1), KIR: (3, 3), TVD: (1, 1)}
 
     @classmethod
     def get_cells_amount_left(cls, method_name):
@@ -40,7 +40,7 @@ class SolverMethods:
         return SolverMethods.cells_for_method[method_name][1]
 
 
-p = 0  # index of pressure (?) in values array
+p = 0  # index of pressure in values array
 v = 1  # index of velocity in values array
 
 
