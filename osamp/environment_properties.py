@@ -5,29 +5,40 @@ spec = importlib.util.spec_from_file_location("visual_analyzer", "../utils/envir
 visual_analyzer = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(visual_analyzer)
 
-class EnvironmentProperties:
+class EnvironmentProperties(object):
 
-    def __init__(self, density=0, elasticity_quotient=0,
-                 mu_lame=0, x_velocity=0, y_velocity=0,
-                 img_creating_parameters=0):
-        self.img_creating_parameters = img_creating_parameters
+    def __init__(self, img_creating_parameters, density = 0, lambda_lame=0, mu_lame=0, x_velocity=0, y_velocity=0):
+        self.init_params = dict(img_creating_parameters)
+        self.img_creating_parameters = dict(img_creating_parameters)
         self.density = density
-        self.elasticity_quotient = 0
-        self.mu_lame = 0
-        self.x_velocity = 0
-        self.y_velocity = 0
+        self.lambda_lame = lambda_lame
+        self.mu_lame = mu_lame
+        self.x_velocity = x_velocity
+        self.y_velocity = y_velocity
         self.E = 0
         self.nu_puass = 0
-        if x_velocity == 0 and y_velocity == 0 and mu_lame == 0 and elasticity_quotient != 0:
-            self.set_dens_and_lame_for_acoustic(density, elasticity_quotient)
-        if x_velocity == 0 and y_velocity == 0 and mu_lame != 0 and elasticity_quotient != 0:
-            self.set_dens_and_lame_for_seismic(density, elasticity_quotient, mu_lame)
-        if x_velocity != 0 and y_velocity == 0 and mu_lame == 0 and elasticity_quotient == 0:
+        if x_velocity == 0 and y_velocity == 0 and mu_lame == 0 and lambda_lame != 0:
+            self.set_dens_and_lame_for_acoustic(density, lambda_lame)
+        if x_velocity == 0 and y_velocity == 0 and mu_lame != 0 and lambda_lame != 0:
+            self.set_dens_and_lame_for_seismic(density, lambda_lame, mu_lame)
+        if x_velocity != 0 and y_velocity == 0 and mu_lame == 0 and lambda_lame == 0:
             self.set_dens_and_speeds_for_acoustic(density, x_velocity)
-        if x_velocity != 0 and y_velocity != 0 and mu_lame == 0 and elasticity_quotient == 0:
+        if x_velocity != 0 and y_velocity != 0 and mu_lame == 0 and lambda_lame == 0:
             self.set_dens_and_speeds_for_seismic(density, x_velocity, y_velocity)
 
 
+    def set_params_for_acoustic_using_v_p(self):
+        self.__calculate_params_for_acoustic_task_v_p()
+
+    def set_params_for_acoustic_using_k(self):
+        self.__calculate_params_for_acoustic_task_k()
+
+
+    def set_params_for_seismic_using_lame(self):
+        self.__calculate_params_for_seismic_task_vp_vs()
+
+    def set_params_for_seismic_using_speeds(self):
+        self.__calculate_params_for_seismic_task_lame()
 
     def set_dens_and_lame_for_seismic(self, density, elasticity_quotient, mu_lame):
         self.density = density
@@ -57,6 +68,52 @@ class EnvironmentProperties:
                   'x_velocity = ': self.x_velocity, 'y_velocity = ': self.y_velocity,
                   'E = ': self.E, 'nu_puass = ': self.nu_puass}
         return params
+
+    def __calculate_params_for_acoustic_task_v_p(self):
+        for buf_color in self.init_params.keys():
+            init_params = self.init_params.get(buf_color)
+            density = init_params[0]
+            v_p = init_params[1]
+            lambda_lame = self.__calculate_lambda_lame(density, v_p)
+            self.img_creating_parameters.update({buf_color: [density, lambda_lame, v_p]})
+
+    def __calculate_params_for_acoustic_task_k(self):
+        for buf_color in self.init_params.keys():
+            init_params = self.init_params.get(buf_color)
+            density = init_params[0]
+            lambda_lame = init_params[1]
+            v_p = self.__calculate_v_p(density, lambda_lame)
+            self.img_creating_parameters.update({buf_color: [density, lambda_lame, v_p]})
+
+    def __calculate_lambda_lame(self, density, v_p):
+        lambda_lame = (v_p ** 2) * density
+        return lambda_lame
+
+    def __calculate_v_p(self, density, lambda_lame):
+        v_p = (lambda_lame/density) ** 0.5
+        return v_p
+
+    def __calculate_params_for_seismic_task_vp_vs(self):
+        for buf_color in self.init_params.keys():
+            init_params = self.init_params.get(buf_color)
+            density = init_params[0]
+            v_p = init_params[1]
+            v_s = init_params[2]
+            self.set_dens_and_speeds_for_seismic(density, v_p, v_s)
+            mu_lame = self.mu_lame
+            lambda_lame = self.lambda_lame
+            self.img_creating_parameters.update({buf_color: [density, lambda_lame, mu_lame, v_p, v_s]})
+
+    def __calculate_params_for_seismic_task_lame(self):
+        for buf_color in self.init_params.keys():
+            init_params = self.init_params.get(buf_color)
+            density = init_params[0]
+            lambda_lame = init_params[1]
+            mu_lame = init_params[2]
+            self.set_dens_and_lame_for_seismic(density, lambda_lame, mu_lame)
+            v_p = self.x_velocity
+            v_s = self.y_velocity
+            self.img_creating_parameters.update({buf_color: [density, lambda_lame, mu_lame, v_p, v_s]})
 
     def __calculate_Lame_and_Puass_and_E(self):
         self.mu_lame = self.y_velocity ** 2 * self.density
@@ -141,11 +198,11 @@ class EnvironmentProperties:
 # # print(field.shape)
 #
 # image_path = "three_col.jpg"
-# params = {(254, 242, 0) : [1, 2, 3]}
-# properties = environment_properties(params=params)
+# params = {(254, 242, 0) : [1, 200, 30]}
+# properties = EnvironmentProperties(img_creating_parameters=params)
+# properties.set_params_for_seismic_using_lame()
 # field = properties.create_environment_from_image(image_path)
-# print(type(field))
 # print(field[663][1626])
-#
-# # buf = tuple(map(tuple, image[0][0]))
-# # print(buf[0])
+
+# buf = tuple(map(tuple, image[0][0]))
+# print(buf[0])
