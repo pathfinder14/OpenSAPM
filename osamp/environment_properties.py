@@ -8,9 +8,9 @@ spec.loader.exec_module(visual_analyzer)
 class EnvironmentProperties:
 
     def __init__(self, density = 0, lambda_lame=0, mu_lame=0, x_velocity=0, y_velocity=0, img_creating_parameters=None):
-        # Uncomment only whet it will be needed
-        # self.init_params = dict(img_creating_parameters)
-        # self.img_creating_parameters = dict(img_creating_parameters)
+        if img_creating_parameters is not None:
+            self.init_params = dict(img_creating_parameters)
+            self.img_creating_parameters = dict(img_creating_parameters)
         self.density = density
         self.lambda_lame = lambda_lame
         self.elasticity_quotient = lambda_lame
@@ -75,24 +75,24 @@ class EnvironmentProperties:
         for buf_color in self.init_params.keys():
             init_params = self.init_params.get(buf_color)
             density = init_params[0]
-            v_p = init_params[1]
-            lambda_lame = self.__calculate_lambda_lame(density, v_p)
-            self.img_creating_parameters.update({buf_color: [density, lambda_lame, v_p]})
+            x_velocity = init_params[1]
+            elasticity_quotient = self.__calculate_lambda_lame(density, x_velocity)
+            self.img_creating_parameters.update({buf_color: [density, elasticity_quotient, x_velocity]})
 
     def __calculate_params_for_acoustic_task_k(self):
         for buf_color in self.init_params.keys():
             init_params = self.init_params.get(buf_color)
             density = init_params[0]
-            lambda_lame = init_params[1]
-            v_p = self.__calculate_v_p(density, lambda_lame)
-            self.img_creating_parameters.update({buf_color: [density, lambda_lame, v_p]})
+            elasticity_quotient = init_params[1]
+            x_velocity = self.__calculate_v_p(density, elasticity_quotient)
+            self.img_creating_parameters.update({buf_color: [density, elasticity_quotient, x_velocity]})
 
-    def __calculate_lambda_lame(self, density, v_p):
-        lambda_lame = (v_p ** 2) * density
-        return lambda_lame
+    def __calculate_lambda_lame(self, density, x_velocity):
+        elasticity_quotient = (x_velocity ** 2) * density
+        return elasticity_quotient
 
-    def __calculate_v_p(self, density, lambda_lame):
-        v_p = (lambda_lame/density) ** 0.5
+    def __calculate_v_p(self, density, elasticity_quotient):
+        v_p = (elasticity_quotient / density) ** 0.5
         return v_p
 
     def __calculate_params_for_seismic_task_vp_vs(self):
@@ -185,7 +185,7 @@ class EnvironmentProperties:
                         :param image_path: The relative path to the image, which describes the environment
                         :return field:    numpy.ndarray(shape=(height, length)); each element of array contains properties of environment
                 """
-        picture_parser = visual_analyzer._parse_picture(image_path, self.img_creating_parameters)
+        picture_parser = visual_analyzer.visual_analyzer(image_path, self.img_creating_parameters)
         field = picture_parser.create_field()
         return field
 
@@ -200,11 +200,12 @@ class EnvironmentProperties:
 # # print(field.shape)
 #
 # image_path = "three_col.jpg"
-# params = {(254, 242, 0): [1, 200, 30]}
+# params = {(254, 242, 0): [1, 200, 30], (255, 255, 255): [2, 100, 10]}
 # properties = EnvironmentProperties(img_creating_parameters=params)
 # properties.set_params_for_seismic_using_lame()
 # field = properties.create_environment_from_image(image_path)
 # print(field[663][1626])
+# print(field[600][230])
 
 # buf = tuple(map(tuple, image[0][0]))
 # print(buf[0])

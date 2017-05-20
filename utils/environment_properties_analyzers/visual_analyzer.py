@@ -39,11 +39,12 @@ class visual_analyzer(object):
 
 
 # image_path = "three_col.jpg"
-# params = {(254, 242, 0) : [1, 2, 3]}
+# params = {(254, 242, 0) : [1, 2, 3],  (255, 255, 255): [2, 100, 10]}
 # anal = visual_analyzer(image_path, params)
-# # anal.show_picture()
+# anal.show_picture()
 # field = anal.create_field()
 # print(field[663][1626])
+# print(field[600][230])
 # image = anal.image
 # # buf = tuple(map(tuple, image[0][0]))
 # # print(buf[0])
