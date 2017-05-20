@@ -1,5 +1,6 @@
 import numpy as np
 import importlib.util
+import utils.environment_properties_analyzers.visual_analyzer as va
 
 spec = importlib.util.spec_from_file_location("visual_analyzer", "../utils/environment_properties_analyzers/visual_analyzer.py")
 visual_analyzer = importlib.util.module_from_spec(spec)
@@ -12,6 +13,7 @@ class EnvironmentProperties(object):
         self.img_creating_parameters = dict(img_creating_parameters)
         self.density = density
         self.lambda_lame = lambda_lame
+        self.elasticity_quotient = lambda_lame
         self.mu_lame = mu_lame
         self.x_velocity = x_velocity
         self.y_velocity = y_velocity
@@ -101,7 +103,7 @@ class EnvironmentProperties(object):
             v_s = init_params[2]
             self.set_dens_and_speeds_for_seismic(density, v_p, v_s)
             mu_lame = self.mu_lame
-            lambda_lame = self.lambda_lame
+            lambda_lame = self.elasticity_quotient
             self.img_creating_parameters.update({buf_color: [density, lambda_lame, mu_lame, v_p, v_s]})
 
     def __calculate_params_for_seismic_task_lame(self):
@@ -197,12 +199,12 @@ class EnvironmentProperties(object):
 # # field = props.create_environment_for_acoustic()
 # # print(field.shape)
 #
-# image_path = "three_col.jpg"
-# params = {(254, 242, 0) : [1, 200, 30]}
-# properties = EnvironmentProperties(img_creating_parameters=params)
-# properties.set_params_for_seismic_using_lame()
-# field = properties.create_environment_from_image(image_path)
-# print(field[663][1626])
+image_path = "three_col.jpg"
+params = {(254, 242, 0): [1, 200, 30]}
+properties = EnvironmentProperties(img_creating_parameters=params)
+properties.set_params_for_seismic_using_lame()
+field = properties.create_environment_from_image(image_path)
+print(field[663][1626])
 
 # buf = tuple(map(tuple, image[0][0]))
 # print(buf[0])
