@@ -192,12 +192,12 @@ class EnvironmentProperties(object):
 # # field = props.create_environment_for_acoustic()
 # # print(field.shape)
 #
-image_path = "three_col.jpg"
-params = {(254, 242, 0) : [1, 200, 30]}
-properties = EnvironmentProperties(img_creating_parameters=params)
-properties.set_params_for_seismic_using_lame()
-field = properties.create_environment_from_image(image_path)
-print(field[663][1626])
+# image_path = "three_col.jpg"
+# params = {(254, 242, 0) : [1, 200, 30]}
+# properties = EnvironmentProperties(img_creating_parameters=params)
+# properties.set_params_for_seismic_using_lame()
+# field = properties.create_environment_from_image(image_path)
+# print(field[663][1626])
 
 # buf = tuple(map(tuple, image[0][0]))
 # print(buf[0])
