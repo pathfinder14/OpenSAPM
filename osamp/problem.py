@@ -44,7 +44,9 @@ class Problem(object):
         self._model = self._assemble_model()
         self._method = params['method']
         self._source = params['source']
-        self._buffering_step = params['buffering_step']
+        self._buffering_step = int(params['buffering_step'])
+        self._left_boundary_conditions = params['left_boundary_conditions']
+        self._right_boundary_conditions = params['right_boundary_conditions']
         self.source = self._produce_source_of_waves()
         self._grid = self._define_grid()
         # print('Problem: ' + str(self))

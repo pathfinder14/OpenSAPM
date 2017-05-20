@@ -8,3 +8,5 @@ x_velocity 0
 y_velocity 0
 source spherical
 buffering_step 50
+left_boundary_conditions applied_force
+right_boundary_conditions reflection

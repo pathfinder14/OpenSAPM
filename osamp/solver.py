@@ -62,8 +62,8 @@ class Solver:
         print(result_grid.shape)
         for i in range(len(time)):
             grid_prev_t = grid_next_t
-            grid_prev_t = self._generate_border_conditions(grid_prev_t, self.problem._type, self.problem._method)
-            grid_next_t = self._generate_border_conditions(grid_next_t, self.problem._type, self.problem._method)
+            grid_prev_t = self._generate_border_conditions(grid_prev_t)
+            grid_next_t = self._generate_border_conditions(grid_next_t)
             source_of_grid.update_source_in_grid(grid_prev_t) ##TODO
             source_of_grid.update_source_in_grid(grid_next_t) ##TODO
 
@@ -96,12 +96,16 @@ class Solver:
         pass
 
 
-    def _generate_border_conditions(self, grid, type_of_task, method_name):
+    def _generate_border_conditions(self, grid):
         # for i in range(len(grid[0])):
         #     grid[0][i] = [1,1]
         # return 
         if self._dimension == 1:
-            return border_conditions.border_condition_1d(grid, type_of_task, 'reflection', 'reflection', method_name)
+            return border_conditions.border_condition_1d(
+                grid, self.problem._type,
+                self.problem._left_boundary_conditions,
+                self.problem._right_boundary_conditions,
+                self.problem._method)
         elif self._dimension == 2:
             return border_conditions.border_condition_2d()
     
