@@ -10,4 +10,5 @@ def kir(x_nods_quantity, grid, transfer_velocity, time_step, x_step):
             continue
         else:
             new_grid[m] = grid[m] - np.dot(sigma, (grid[m+1] - grid[m]))
+    new_grid = np.delete(grid, [0, 1, -1, -2])
     return new_grid
