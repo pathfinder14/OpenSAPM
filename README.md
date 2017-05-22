@@ -2,8 +2,8 @@
 Open seismic-acoustic propagation model.
 
 ## Usage
-1
-`1``sh
+
+```sh
 python __main__.py path_to_file_with_problem_descriptions
 ```
 
