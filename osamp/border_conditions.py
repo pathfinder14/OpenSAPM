@@ -121,4 +121,5 @@ def border_condition_1d_seismic(arr, border_left, border_right, method_name, for
     return border_condition_1d_acoustic(arr, border_left, border_right, method_name, force_left, force_right)
 
 
+
 # print border_condition_1d([[0, 1], [1, 2], [2, 3], [4, 5], [5, 6]], ProblemTypes.ACOUSTIC, ConditionNames.APPLIED_FORCE_CONDITION, ConditionNames.APPLIED_FORCE_CONDITION, SolverMethods.BEAM_WARMING)

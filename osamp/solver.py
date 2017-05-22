@@ -32,15 +32,18 @@ class Solver:
         self.cfl = 0.1 # TODO change this parametrs to user's propertyies
         self._dimension = Problem.dimension
         self.problem = Problem
-        matrix_of_eigns = Problem.model.lambda_matrix
-        omega_matrix = Problem.model.omega_matrix
-        inv_matrix = Problem.model.inverse_omega_matrix
+        self.matrix_of_eigns = Problem.model.lambda_matrix
+        self.omega_matrix = Problem.model.omega_matrix
+        self.inv_matrix = Problem.model.inverse_omega_matrix
         self._grid = Problem._grid._grid
         self.source = Problem.source
         self.type = Problem._type
         self.buffering_step = Problem._buffering_step
         self.x_velocity = Problem.model.env_prop.x_velocity
         self.tension = Problem.tension
+        self.time_step = self.cfl*self.problem._grid._dx/self.x_velocity
+        self.spatial_step = 1
+
         if self._dimension == 1:
             self.solve_1D()
         else:
@@ -50,8 +53,8 @@ class Solver:
     def solve_1D(self):
         grid = self._grid
         source_of_grid = self.source
-        time_step = self.cfl*self.problem._grid._dx/self.x_velocity
         spatial_step = 1
+        time_step = self.time_step
         matrix_of_eigns = self.problem.model.lambda_matrix
         omega_matrix = self.problem.model.omega_matrix
         inv_matrix = self.problem.model.inverse_omega_matrix
@@ -67,7 +70,7 @@ class Solver:
             grid_prev_t = grid_next_t
             grid_prev_t = self._generate_border_conditions(grid_prev_t)
             source_of_grid.update_source_in_grid(grid_prev_t) ##TODO
-            source_of_grid.update_source_in_grid(grid_next_t) ##TODO
+            #source_of_grid.update_source_in_grid(grid_next_t) ##TODO
 
             for k in range(len(grid_prev_t)):#recieve Riman's invariant
                 grid_prev_t[k] = np.dot(omega_matrix, grid_prev_t[k])
@@ -102,40 +105,57 @@ class Solver:
         pass
 
     def solve_2D(self):
-        print(self._grid[0])
+        self.splitting_method()
         pass
 
-    def solve_splitted_2D(self, type_of_task, axis, time):
-        pass
+    def solve_splitted_2D(self, type_of_task, grid):
+        grid_next = np.zeros_like(grid[0])
+        grid_prev = np.zeros_like(grid[0])
+        j = 0
 
+        for i in range(2*grid.shape[0]):
+            #grid[3][3] = np.array([1, 20, 20])
+            if j == 3:
+               self.source.update_source_in_grid(grid[3])
+            if (i % 2 == 0):
+                grid_prev = grid[j, :]
+                grid_prev = self._generate_border_conditions(grid_prev)
+                #FIX ME 
+            else:
+                grid_prev = grid[:, j]
+                grid_prev = self._generate_border_conditions(grid_prev)
 
-    def splitting_method():
+            for k in range(grid_prev.shape[0]):#recieve Riman's invariant
+                grid_prev[k] = np.dot(self.omega_matrix, grid_prev[k])
+            if(self.problem._method == 'kir'):
+                for index in self.tension.values():
+                    grid_next[:, index] = kir.kir(grid_prev.shape[0], grid_prev[:,index], self.matrix_of_eigns[index][index], self.time_step, self.spatial_step)
+            for k in range(grid_next.shape[0]):#recieve Riman's invariant
+                grid_next[k] = np.dot(self.inv_matrix, grid_next[k])
+            if (i % 2 == 0):
+                grid[j, :] = grid_next 
+            else:
+                grid[:, j] = grid_next
+                j+=1
+            #print("Grid {0} on iter{1}\n".format(grid, j))
+
+        return grid
+
+    def splitting_method(self):
         grid = self._grid
         source_of_grid = self.source
-        time_step = self.cfl*self.problem._grid._dx/self.x_velocity
         spatial_step = 1
-        matrix_of_eigns = self.problem.model.lambda_matrix
-        omega_matrix = self.problem.model.omega_matrix
-        inv_matrix = self.problem.model.inverse_omega_matrixy 
-        #initialize grid ? Maybe it's a bad idea
 
-        grid_X_next_t = np.zeros(grid.shape[0])
-        grid_X_prev_t = np.zeros(grid.shape[0])
-        grid_Y_prev_t = np.zeros(grid.shape[0])
-        grid_Y_next_t = np.zeros(grid.shape[0])
-        #This method work with quadric grid
         grid_next = np.zeros(grid.shape[0])
         #for t in range(1, grid.shape[0]):
         ##get only pressure values : array[:, 0]
-        time = np.arange(0, 300, time_step)
-        result_of_iteration_grid = np.zeros((len(time), grid.shape[0], grid.shape[2]))
+        time = np.arange(0, 10, self.time_step)
+        result_of_iteration_grid = np.zeros((len(time), grid.shape[0], grid.shape[1], grid.shape[2]))
         #do iter
         for i in range(len(time)):
-            if i % 2 == 0:
-                grid_next = solve_splitted_2D(self.type, 'x', time[i], grid[i,:])
-            else:
-                grid_next = solve_splitted_2D(self.type, 'y', time[i], grid[:,i])
-            result_of_iteration_grid[i] = grid_next
+            grid_n = self.solve_splitted_2D(self.type, grid)
+            result_of_iteration_grid[i] = grid_n
+        print(result_of_iteration_grid)
         #Create time array 
 
 
@@ -150,5 +170,8 @@ class Solver:
                 self.problem._right_boundary_conditions,
                 self.problem._method)
         elif self._dimension == 2:
-            return border_conditions.border_condition_2d()
-    
+            return border_conditions.border_condition_1d(
+                grid, self.problem._type,
+                self.problem._left_boundary_conditions,
+                self.problem._right_boundary_conditions,
+                self.problem._method)

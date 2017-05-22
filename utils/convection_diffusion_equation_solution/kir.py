@@ -8,5 +8,5 @@ def kir(x_nods_quantity, grid, transfer_velocity, time_step, x_step):
         if (transfer_velocity >= 0):
             new_grid[m] = grid[m] - sigma * (grid[m] - grid[m-1])
         else:
-            new_grid[m] = grid[m] - np.dot(sigma, (grid[m+1] - grid[m]))
+            new_grid[m] = grid[m] - sigma * (grid[m+1] - grid[m])
     return new_grid[1:-1]

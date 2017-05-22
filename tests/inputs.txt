@@ -1,11 +1,11 @@
 dimension 1
 type acoustic
 method kir
-elasticity_quotient 10
-mu_lame 0
-density 10
-x_velocity 0
-y_velocity 0
+elasticity_quotient 12
+mu_lame 0.1
+density 1
+x_velocity 100
+y_velocity 37
 source spherical
 buffering_step 10
 left_boundary_conditions reflection
