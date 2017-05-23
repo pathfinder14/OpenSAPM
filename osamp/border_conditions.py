@@ -271,11 +271,11 @@ def border_condition_2d_seismic(grid, type_of_task, border_left, border_right, b
 
 # print border_condition_1d([[0, 1], [1, 2], [2, 3], [4, 5], [5, 6]], ProblemTypes.ACOUSTIC, ConditionNames.APPLIED_FORCE_CONDITION, ConditionNames.APPLIED_FORCE_CONDITION, SolverMethods.BEAM_WARMING)
 
-
-print border_condition_2d(np.array([[[11,11,11],[12,12,12],[13,13,13]],
-[[21,21,21],[22,22,22],[23,23,23]],
-[[31,31,31],[32,32,32],[33,33,33]]]), ProblemTypes.ACOUSTIC, ConditionNames.CYCLE_CONDITION, ConditionNames.CYCLE_CONDITION, ConditionNames.APPLIED_FORCE_CONDITION,
-                          ConditionNames.CYCLE_CONDITION, SolverMethods.BIOCOMPACT, 15)
+#
+# print border_condition_2d(np.array([[[11,11,11],[12,12,12],[13,13,13]],
+# [[21,21,21],[22,22,22],[23,23,23]],
+# [[31,31,31],[32,32,32],[33,33,33]]]), ProblemTypes.ACOUSTIC, ConditionNames.CYCLE_CONDITION, ConditionNames.CYCLE_CONDITION, ConditionNames.APPLIED_FORCE_CONDITION,
+#                           ConditionNames.CYCLE_CONDITION, SolverMethods.BIOCOMPACT, 15)
 
 
 
