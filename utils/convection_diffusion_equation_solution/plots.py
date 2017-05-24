@@ -50,3 +50,16 @@ t.testing(method = 'Lax-Wendroff', initial =  'peak', velocity = 'func')
 t.testing(method = 'Lax-Wendroff', initial =  'rectangle', velocity = 'const')
 t.testing(method = 'Lax-Wendroff', initial =  'rectangle', velocity = 'x')
 t.testing(method = 'Lax-Wendroff', initial =  'rectangle', velocity = 'func')
+
+
+t.testing(method = 'Fedorenko', initial =  'sin', velocity = 'const')
+t.testing(method = 'Fedorenko', initial =  'sin', velocity = 'x')
+t.testing(method = 'Fedorenko', initial =  'sin', velocity = 'func')
+
+t.testing(method = 'Fedorenko', initial =  'peak', velocity = 'const')
+t.testing(method = 'Fedorenko', initial =  'peak', velocity = 'x')
+t.testing(method = 'Fedorenko', initial =  'peak', velocity = 'func')
+
+t.testing(method = 'Fedorenko', initial =  'rectangle', velocity = 'const')
+t.testing(method = 'Fedorenko', initial =  'rectangle', velocity = 'x')
+t.testing(method = 'Fedorenko', initial =  'rectangle', velocity = 'func')
