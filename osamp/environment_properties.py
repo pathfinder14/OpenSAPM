@@ -136,7 +136,7 @@ class EnvironmentProperties:
         self.E = self.elasticity_quotient * (1 + self.nu_puass) * (1 - 2*self.nu_puass)/(self.nu_puass)
 
 
-    def create_environment_for_seismic(self, x=1000, y=1000):
+    def create_environment_for_seismic(self, x=15, y=15):
         """
                 One of the main functions in class <Environment_properties> which returns the created environment field
                 for seismic task according to the pack of input parameters:
@@ -154,7 +154,7 @@ class EnvironmentProperties:
         field.fill(square)
         return field
 
-    def create_environment_for_acoustic(self, x=100, y=100):
+    def create_environment_for_acoustic(self, x=15, y=15):
         """
                 One of the main function in class <Environment_properties> which returns the created environment field
                 for acoustic task according to the pack of input parameters:

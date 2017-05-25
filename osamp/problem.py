@@ -122,7 +122,7 @@ class Problem(object):
             "density": self._density,
             "x_velocity": self._x_velocity,
             "y_velocity": self._y_velocity
-        })
+        }, self.GRID_SIZE)
         return result_model
 
 

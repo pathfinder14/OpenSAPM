@@ -8,7 +8,7 @@ class Model:
     Model contain matrix of the acoustic/seismic equations
     
     """
-    def __init__(self, config):
+    def __init__(self, config, grid_size=15):
         self.arg = config
         self._type_problem = config['type']
         self._dim = config['dimension']
@@ -16,6 +16,10 @@ class Model:
         self.env_prop = env.EnvironmentProperties(
             config['density'], config['elasticity_quotient'], config['mu_lame'],
             config['x_velocity'], config['x_velocity'])
+        if self._type_problem == "acoustic":
+            self.field = self.env_prop.create_environment_for_acoustic(x=grid_size, y=grid_size)
+        if self._type_problem == "seismic":
+            self.field = self.env_prop.create_environment_for_seismic(x=grid_size, y=grid_size)
         self._lamda_matrix = \
             matrix.get_matrix(self._dim, self._type_problem, self.env_prop.elasticity_quotient,
                               self.env_prop.density, self.env_prop.mu_lame)
