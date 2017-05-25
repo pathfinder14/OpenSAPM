@@ -86,6 +86,6 @@ def bicompact_method(a,tau,h,x0,x1):
 # 	x1[i] = 0
 # x0 = np.arange(0,10,h)
 
-# x1 = bicompactMethod(a,tau,h,x0,x1)
+# x1 = bicompact_method(a,tau,h,x0,x1)
 # print(x1)
 # print(x0)
