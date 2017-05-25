@@ -50,7 +50,7 @@ def draw1DMovie(solution, t_filming_step, x_start, x_end, legend, t_grid_step):
         
     #Перевели шаг из "реального времени" в шаг по массиву решения.
     t_step = int(t_filming_step / t_grid_step)
-    
+    t_step = int(t_grid_step * len(solution))
     #Вызываем рисовалку срезов по времени в цикле.
     for i in range(0, len(solution), t_step):
         draw1DSlice(solution[i], i * t_grid_step, x_start, x_end, legend, np.max(solution))
