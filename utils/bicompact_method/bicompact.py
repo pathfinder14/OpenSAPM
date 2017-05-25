@@ -65,7 +65,7 @@ def bicompact_method(a,tau,h,x0,x1):
 	if (a==0):
 		x1 = x0
 
-	return x1
+	return x1[1:x1.size-1]
 
 # tests
 
