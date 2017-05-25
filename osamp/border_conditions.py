@@ -78,7 +78,7 @@ def border_condition_2d(grid, type_of_task, border_left, border_right, method_na
         return border_condition_2d_seismic(grid, border_left, border_right, method_name, force_top)
 
 
-def border_condition_1d_acoustic(grid, border_left, border_right, method_name, force_left=0, force_right=0):
+def border_condition_1d_acoustic(grid, type_of_task, border_left, border_right, method_name, force_left=0, force_right=0):
     cells_left = SolverMethods.get_cells_amount_left(method_name)
     cells_right = SolverMethods.get_cells_amount_right(method_name)
 
@@ -130,6 +130,77 @@ def border_condition_1d_acoustic(grid, border_left, border_right, method_name, f
     ext_grid = np.concatenate((ext_grid, grid_new), axis=0)
     return ext_grid
 
+
+def border_condition(grid, type_of_task, border_left, border_right, method_name, tension, force_left=0, force_right=0):
+    cells_left = SolverMethods.get_cells_amount_left(method_name)
+    cells_right = SolverMethods.get_cells_amount_right(method_name)
+
+    grid_new = np.zeros((cells_left, len(tension)))
+
+    # Check left border.
+
+    if border_left == ConditionNames.REFLECTION_CONDITION:
+        for i in range(cells_left - 1, -1, -1):
+            grid_new[i] = grid[cells_left - 1 - i]
+            #grid_new[i][v] = -grid[cells_left - 1 - i][v]
+
+    elif border_left == ConditionNames.CYCLE_CONDITION:
+        for i in range(cells_left - 1, -1, -1):
+            grid_new[i] = grid[len(grid) - cells_left + i]
+    #
+    elif border_left == ConditionNames.ABSORBING_CONDITION:
+        for i in range(cells_left - 1, -1, -1):
+            grid_new[i] = grid[cells_left - 1 - i]
+
+    elif border_left == ConditionNames.APPLIED_FORCE_CONDITION:
+        if type_of_task == 'acoustic':
+            for i in range(cells_left - 1, -1, -1):
+                grid_new[i][v] = grid[cells_left - 1 - i][v]
+                grid_new[i][p] = 2 * force_left - grid[cells_left - 1 - i][p]
+                grid_new[i][2] = grid[cells_left - 1 - i][2]
+        else:#TODO you should create real applied force for seismic tension [sigma11, sigma22, sigma12, u, v]
+            for i in range(cells_left - 1, -1, -1):
+                grid_new[i][0] = 2 * force_left - grid[cells_left - 1 - i][0]
+                grid_new[i][1] = 2 * force_left - grid[cells_left - 1 - i][1]
+                grid_new[i][2] = grid[cells_left - 1 - i][2]
+                grid_new[i][3] = grid[cells_left - 1 - i][3]
+                grid_new[i][4] = grid[cells_left - 1 - i][4]
+
+
+
+    ext_grid = np.concatenate((grid_new, grid), axis=0)
+
+    grid_new = np.zeros((cells_right, len(tension)))
+
+    # Check right border.
+    if border_right == ConditionNames.REFLECTION_CONDITION:
+        for i in range(cells_right - 1, -1, -1):
+           grid_new[i] = grid[len(grid) - 1 - i]
+    elif border_right == ConditionNames.CYCLE_CONDITION:
+        for i in range(cells_right - 1, -1, -1):
+            grid_new[i] = grid[i]
+
+    elif border_right == ConditionNames.ABSORBING_CONDITION:
+        for i in range(cells_right - 1, -1, -1):
+            grid_new[i] = grid[len(grid) - 1 - i]
+
+    elif border_right == ConditionNames.APPLIED_FORCE_CONDITION:
+        if type_of_task == 'acoustic':
+            for i in range(cells_left - 1, -1, -1):
+                grid_new[i][v] = grid[cells_left - 1 - i][v]
+                grid_new[i][p] = 2 * force_left - grid[cells_left - 1 - i][p]
+                grid_new[i][2] = grid[cells_left - 1 - i][2]
+        else:#TODO you should create real applied force for seismic tension [sigma11, sigma22, sigma12, u, v]
+            for i in range(cells_left - 1, -1, -1):
+                grid_new[i][0] = 2 * force_left - grid[cells_left - 1 - i][0]
+                grid_new[i][1] = 2 * force_left - grid[cells_left - 1 - i][1]
+                grid_new[i][2] = grid[cells_left - 1 - i][2]
+                grid_new[i][3] = grid[cells_left - 1 - i][3]
+                grid_new[i][4] = grid[cells_left - 1 - i][4]
+
+
+    ext_grid = np.concatenate((ext_grid, grid_new), axis=0)
+    return ext_grid
 
 def border_condition_1d_seismic(arr, border_left, border_right, method_name, force_left, force_right):
     # for 1d seismic and acoustic conditions are the same

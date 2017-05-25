@@ -108,48 +108,50 @@ class Solver:
         self.splitting_method()
         pass
 
-    def solve_splitted_2D(self, type_of_task, grid):
-        grid_next = np.zeros_like(grid[0])
-        grid_prev = np.zeros_like(grid[0])
+    def solve_splitted_2D(self, type_of_task, real_grid):
+        grid_next = np.zeros_like(real_grid[0])
+        grid_prev = np.zeros_like(real_grid[0])
         j = 0
 
-        for i in range(2*grid.shape[0]):
+        for i in range(2*real_grid.shape[0]):
             #grid[3][3] = np.array([1, 20, 20])
-            if j == 3:
-               self.source.update_source_in_grid(grid[3])
+            
+            self.source.update_source_in_grid(real_grid[3])
             if (i % 2 == 0):
-                grid_prev = grid[j, :]
+                grid_prev = real_grid[j, :]
                 grid_prev = self._generate_border_conditions(grid_prev)
-                #FIX ME 
             else:
-                grid_prev = grid[:, j]
-                grid_prev = self._generate_border_conditions(grid_prev)
+                grid_prev = real_grid[:, j]
+                grid_prev = border_conditions.border_condition(
+                            grid_prev, self.problem._type, "applied_force","absorb",
+                            self.problem._method, self.tension, force_left=100)
 
+            #self.source.update_source_in_grid(grid_prev)
             for k in range(grid_prev.shape[0]):#recieve Riman's invariant
-                grid_prev[k] = np.dot(self.omega_matrix, grid_prev[k])
+                 grid_prev[k] = np.dot(self.omega_matrix, grid_prev[k])
             if(self.problem._method == 'kir'):
                 for index in self.tension.values():
                     grid_next[:, index] = kir.kir(grid_prev.shape[0], grid_prev[:,index], self.matrix_of_eigns[index][index], self.time_step, self.spatial_step)
             for k in range(grid_next.shape[0]):#recieve Riman's invariant
-                grid_next[k] = np.dot(self.inv_matrix, grid_next[k])
+                 grid_next[k] = np.dot(self.inv_matrix, grid_next[k])
             if (i % 2 == 0):
-                grid[j, :] = grid_next 
+                real_grid[j, :] = grid_next 
             else:
-                grid[:, j] = grid_next
+                real_grid[:, j] = grid_next
                 j+=1
+            
             #print("Grid {0} on iter{1}\n".format(grid, j))
 
-        return grid
+        return real_grid
 
     def splitting_method(self):
         grid = self._grid
         source_of_grid = self.source
         spatial_step = 1
-
-        grid_next = np.zeros(grid.shape[0])
+        self.time_step = 1
         #for t in range(1, grid.shape[0]):
         ##get only pressure values : array[:, 0]
-        time = np.arange(0, 10, self.time_step)
+        time = np.arange(0, 100, self.time_step)
         result_of_iteration_grid = np.zeros((len(time), grid.shape[0], grid.shape[1], grid.shape[2]))
         #do iter
         for i in range(len(time)):
@@ -170,8 +172,8 @@ class Solver:
                 self.problem._right_boundary_conditions,
                 self.problem._method)
         elif self._dimension == 2:
-            return border_conditions.border_condition_1d(
+            return border_conditions.border_condition(
                 grid, self.problem._type,
                 self.problem._left_boundary_conditions,
                 self.problem._right_boundary_conditions,
-                self.problem._method)
+                self.problem._method, self.tension)
