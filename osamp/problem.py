@@ -32,7 +32,7 @@ class Problem(object):
 
     def __init__(self, params = None):
         if params is None:
-            params =  {}
+            params = {}
         self.params = params
         self._dimension = int(params['dimension'])
         self._type = params['type']

@@ -7,10 +7,13 @@ spec.loader.exec_module(visual_analyzer)
 
 class EnvironmentProperties:
 
-    def __init__(self, density = 0, lambda_lame=0, mu_lame=0, x_velocity=0, y_velocity=0, img_creating_parameters=None):
+    def __init__(self, density=0, lambda_lame=0, mu_lame=0, x_velocity=0, y_velocity=0,
+                 img_creating_parameters=None, analytical_creating_parameters=None):
         if img_creating_parameters is not None:
             self.init_params = dict(img_creating_parameters)
             self.img_creating_parameters = dict(img_creating_parameters)
+        if analytical_creating_parameters is not None:
+            self.analytical_creating_parameters = analytical_creating_parameters
         self.density = density
         self.lambda_lame = lambda_lame
         self.elasticity_quotient = lambda_lame

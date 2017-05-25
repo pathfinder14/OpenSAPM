@@ -5,7 +5,7 @@ def get_seismic1d_matrix(mu, density):
     return np.diag(np.array([c_p, -c_p]))
 
 def get_seismic1d_eign_matrix(mu, density):
-    """ Retrun matrix of eigenvectors"""
+    """ Return matrix of eigenvectors"""
     c_p = np.sqrt(mu/density)
     return np.array([[1/c_p, 1/c_p], [1, 1]])
 
@@ -24,8 +24,8 @@ def get_acoustic2D_matrix(_k, density):
     return np.diag(np.array([c1, 0, c2]))
 
 def get_acoustic2D_eign_matrix(_k, density, n):
-    """ Retrun matrix of eigenvectors"""
-    return np.array([[-np.sqrt(_k*density), 0, np.sqrt(_k*density)],[n[0], n[1], n[0]], [n[1], n[0], n[1]]])
+    """ Return matrix of eigenvectors"""
+    return np.array([[-np.sqrt(_k*density), 0, np.sqrt(_k*density)], [n[0], n[1], n[0]], [n[1], n[0], n[1]]])
 
 def get_acoustic1D_matrix(_k, density):
     c1 = -np.sqrt(_k / density)
@@ -34,7 +34,7 @@ def get_acoustic1D_matrix(_k, density):
     return acoustic_matrix
 
 def get_acoustic1D_eign_matrix(_k, density, n):
-    """ Retrun matrix of eigenvectors"""
+    """ Return matrix of eigenvectors"""
     return np.array([[-np.sqrt(_k * density), np.sqrt(_k * density)], [n, n]])
 
 def get_acoustic1D_inv_eign_matrix(_k, density, n):
