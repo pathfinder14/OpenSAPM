@@ -122,9 +122,7 @@ class Solver:
                 grid_prev = self._generate_border_conditions(grid_prev)
             else:
                 grid_prev = real_grid[:, j]
-                grid_prev = border_conditions.border_condition(
-                            grid_prev, self.problem._type, "applied_force","absorb",
-                            self.problem._method, self.tension, force_left=100)
+                grid_prev = self._generate_right_border_conditions(grid_prev)
 
             #self.source.update_source_in_grid(grid_prev)
             for k in range(grid_prev.shape[0]):#recieve Riman's invariant
@@ -177,3 +175,7 @@ class Solver:
                 self.problem._left_boundary_conditions,
                 self.problem._right_boundary_conditions,
                 self.problem._method, self.tension)
+
+    def _generate_right_border_conditions(self, grid):
+        return border_conditions.border_condition(grid, self.problem._type, "applied_force","absorb",
+                                        self.problem._method, self.tension, force_left=100)

@@ -136,7 +136,6 @@ def border_condition(grid, type_of_task, border_left, border_right, method_name,
     cells_right = SolverMethods.get_cells_amount_right(method_name)
 
     grid_new = np.zeros((cells_left, len(tension)))
-
     # Check left border.
 
     if border_left == ConditionNames.REFLECTION_CONDITION:

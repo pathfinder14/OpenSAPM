@@ -48,7 +48,6 @@ class Problem(object):
         self._left_boundary_conditions = params['left_boundary_conditions']
         self._right_boundary_conditions = params['right_boundary_conditions']
         self.source = self._produce_source_of_waves()
-        self._grid = self._define_grid()
         if (self.type == 'acoustic') & (self.dimension == 2):
             self.tension = {
             'p':0,
@@ -65,11 +64,16 @@ class Problem(object):
             'mu':0,
             'v':1
              }
-        elif (self.type == 'seismic') & (self.dimension == 2):
+        else:# (self.type == 'seismic') & (self.dimension == 2):
             self.tension = {
-            'p':0,
-            'v':1
+            'sigma11':0,
+            'sigma22':1,
+            'sigma21':2,
+            'u':3,
+            'v':4
              }
+        self._grid = self._define_grid()
+
         # print('Problem: ' + str(self))
 
     @property
@@ -103,7 +107,7 @@ class Problem(object):
             return grid.Grid((Problem.GRID_SIZE, self.dimension + 1))
         else:
             # TODO create Grid2d class and replace the following with it
-            return grid.Grid((Problem.GRID_SIZE, Problem.GRID_SIZE, self.dimension + 1))
+            return grid.Grid((Problem.GRID_SIZE, Problem.GRID_SIZE, len(self.tension)))
 
     def _assemble_model(self):
         """
