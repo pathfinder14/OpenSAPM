@@ -5,15 +5,18 @@ a - параметр перед производной по x
 tau - шаг по времени
 h - шаг по координате
 x0 - начальное условие t=0 (numpy array)
+x1 - следующий временной слой с граничными условиями (если не указан, то метод сам создаст
+новый слой с правильными граничными условиями)
 Возвращаемое значение: Следующий слой (x1) - numpy array
 '''
-def bicompact_method(a,tau,h,x0):
+def bicompact_method(a,tau,h,x0,x1=0):
 	# Так как работаем с целыми узлами - увеличиваем шаг вдвое
 	h=2*h
 	r=tau/h
 
 	#Создадим новый пустой временной слой
-	x1 = np.zeros(x0.size)
+	if (type(x1)==int):
+		x1 = np.zeros(x0.size)
 
 	# Случай, когда краевый условия необходимо задать на ЛЕВОМ конце и а>0
 	if (a>0):
@@ -75,7 +78,7 @@ def bicompact_method(a,tau,h,x0):
 	if (a==0):
 		x1 = x0
 
-	return x1[1:x1.size-1]
+	return x1[0:x1.size]
 
 # tests
 
@@ -87,11 +90,9 @@ def bicompact_method(a,tau,h,x0):
 # a=2
 # tau=1
 # h=1
-# x1 = np.arange(0,10,h)
-# for i in range(x1.size):
-# 	x1[i] = 0
+# x1 = np.zeros(10)
 # x0 = np.arange(0,10,h)
 
-# x1 = bicompact_method(a,tau,h,x0)
+# x1 = bicompact_method(a,tau,h,x0,x1)
 # print(x1)
 # print(x0)
