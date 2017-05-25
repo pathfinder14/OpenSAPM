@@ -24,9 +24,14 @@ class Source:
 
     def _create_spherical_source(self, grid):
         #TODO delete unnamed constants
-        grid[self.coordinates] = np.array([100, 20])
-        grid[self.coordinates - 1] = np.array([100*np.cos(15),20*np.cos(15)])
-        grid[self.coordinates + 1] = np.array([100*np.cos(15),20*np.cos(15)])
+        if grid.shape[1] == 2:
+            grid[self.coordinates] = np.array([100, 2])
+        elif grid.shape[1] == 3:
+            grid[self.coordinates]   = np.array([100, 0, 0])
+        else:
+            pass
+        #grid[self.coordinates - 1] = np.array([100*np.cos(15),20*np.cos(15)])
+        #grid[self.coordinates + 1] = np.array([100*np.cos(15),20*np.cos(15)])
         return grid
 
     def update_source_in_grid(self, grid):
