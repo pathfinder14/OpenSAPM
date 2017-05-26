@@ -9,7 +9,11 @@ x = np.linspace(0,2,nx)
 nt = 25    
 dt = .02  
 c = 1.      #assume wavespeed of c = 1
-u = -np.sin(2*np.pi*x)
+u = np.zeros((1,nx))
+for i in range(int(nx/2)):
+    u[0][i] = 1
+for i in range(int(nx/2), nx):
+    u[0][i] = 2
 #u = np.zeros(nx)      #numpy function ones()
 #u[.5/dx : 1/dx+1]=2  #setting u = 2 between 0.5 and 1 as per our I.C.s
 k = 3 # number of weights Order= 2*k-1
@@ -40,5 +44,6 @@ for n in range(1,nt):
         else:
             uc[i] = un[i]-dt/dx*(flux[i+1]-flux[i])
 
-plt.plot(uc)
+
+plt.plot(uc, '.')
 plt.show()
