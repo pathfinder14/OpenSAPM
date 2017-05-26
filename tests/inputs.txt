@@ -1,13 +1,13 @@
 dimension 1
 type acoustic
-method kir
+method bicompact
 image_path three_col.jpg
-elasticity_quotient 1
+elasticity_quotient 2
 mu_lame 1
 density 1
 x_velocity 0
 y_velocity 0
 source spherical
-buffering_step 40
+buffering_step 80
 left_boundary_conditions reflection
 right_boundary_conditions reflection
