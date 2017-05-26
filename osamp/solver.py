@@ -12,6 +12,10 @@ spec = importlib.util.spec_from_file_location("beam_warming", "../utils/convecti
 beam_warming = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(beam_warming)
 
+spec = importlib.util.spec_from_file_location("weno", "../utils/WENO_method/WENOmethod.py")
+weno = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(weno)
+
 spec = importlib.util.spec_from_file_location("bicompact", "../utils/bicompact_method/bicompact.py")
 bicompact = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(bicompact)
@@ -22,6 +26,7 @@ spec.loader.exec_module(tvd)
 
 p = 0  # index of pressure in values array
 v = 1  # index of velocity in values array
+
 
 class Solver:
     """
@@ -90,10 +95,14 @@ class Solver:
 
             elif(self.problem._method == 'beam_warming'):
                 grid_next_t = beam_warming.beam_warming(matrix_of_eigns, time_step, spatial_step, grid_prev_t)
-
+                
+            elif(self.problem._method == 'weno'):
+                grid_next_t = weno.WENOmethod(matrix_of_eigns, time_step, spatial_step, grid_prev_t)
+                
             elif(self.problem._method == 'bicompact'):
                 for index in self.tension.values():
                     grid_next_t[:, index] = bicompact.bicompact_method(matrix_of_eigns[index][index], time_step, spatial_step, grid_prev_t[:, index])
+
             else:
                 raise Exception('Unknown method name: ' + self.problem._method)
             for k in range(len(grid_next_t)):#recieve Riman's invariant
