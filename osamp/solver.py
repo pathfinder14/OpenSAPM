@@ -66,7 +66,7 @@ class Solver:
         #let's imagine that grid has not information about time
         #for t in range(1, grid.shape[0]):
         ##get only pressure values : array[:, 0]
-        #time_step = 1
+        time_step = 1
         time = np.arange(0, 100, time_step)
         result_grid = np.zeros((len(time), grid.shape[0], grid.shape[1]))
 
@@ -163,17 +163,17 @@ class Solver:
         grid = self._grid
         source_of_grid = self.source
         spatial_step = 1
-        self.time_step = 20
+        self.time_step = 2
         #for t in range(1, grid.shape[0]):
         ##get only pressure values : array[:, 0]
-        time = np.arange(0, 400, self.time_step)
+        time = np.arange(0, 200, self.time_step)
         result_of_iteration_grid = np.zeros((len(time), grid.shape[0], grid.shape[1], grid.shape[2]))
         #do iter
         for i in range(len(time)):
             grid_n = self.solve_splitted_2D(self.type, grid)
             result_of_iteration_grid[i] = grid_n
         print(result_of_iteration_grid)
-        postprocess.do_2_postprocess(result_of_iteration_grid[:,:,:,2], float(self.buffering_step), 0, 50, 50, "kaka", np.min(np.min(np.min(result_of_iteration_grid[:,:,:,2]))), np.max(np.max(np.max(result_of_iteration_grid[:,:,:,2]))),self.time_step)
+        postprocess.do_2_postprocess(result_of_iteration_grid[:,:,:,2], float(self.buffering_step), 0, 50, 50, self.problem.type, np.min(np.min(np.min(result_of_iteration_grid[:,:,:,2]))), np.max(np.max(np.max(result_of_iteration_grid[:,:,:,2]))),self.time_step)
         #Create time array 
 
 
@@ -185,13 +185,13 @@ class Solver:
                 self.problem._right_boundary_conditions,
                 self.problem._method)
         elif self._dimension == 2:
-            return border_conditions.border_condition(
+            return border_conditions.border_condition_2d(
                 grid, self.problem._type,
                 self.problem._left_boundary_conditions,
                 self.problem._right_boundary_conditions,
-                self.problem._method, self.tension)
+                self.problem._method)
 
     def _generate_right_border_conditions(self, grid):
-        return border_conditions.border_condition(grid, self.problem._type,  "applied_force","applied_force",
-                                        self.problem._method, self.tension, force_left=0)
+        return border_conditions.border_condition_2d(grid, self.problem._type,  "applied_force","applied_force",
+                                        self.problem._method,  force_left=0)
 
