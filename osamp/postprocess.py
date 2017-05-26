@@ -98,7 +98,8 @@ def draw2DSlice(solution, t_slice, x_start, x_end, y_start, legend, solution_min
     ax.set_title(legend + ' colorbar, '  + 't = ' + str(t_slice)[:time_marker_length] + 's', fontsize = 50) 
     ax.grid(True)
     
-    cpool = ['blue','cyan','green','yellow','pink']
+    # cpool = ['blue','cyan','green','yellow','pink']
+    cpool = ['#f7f5f2','#e5dfd3','#ccbea1','#ad9b74','#8e7a4e', '#705b2f', '#4f3d17', '#352709', '#070500']
     cmap = mpl.colors.ListedColormap(cpool) # Задаём дискретную шкалу цветов из списка cpool
     cmap.set_over('red') # задаём цвет для значений, выходящих за рамки границы levels[-1] (сверху шкалы)
     cmap.set_under('grey') # задаём цвет для значений, выходящих за рамки границы levels[0] (снизу шкалы)
@@ -163,9 +164,23 @@ def draw2DMovie(solution, t_filming_step, x_start, x_end, y_start, legend, solut
         
     #Перевели шаг из "реального времени" в шаг по массиву решения.
     t_step = int(t_filming_step / t_grid_step)
- #Вызываем рисовалку срезов по времени в цикле.
+
+
+    #Если откомментили это, значит, вы готовы к тому, что малые значения сеточной функции отображаться не будут. 
+    #Закомментите инициализацию этих же переменных в цикле.
+    #Нормировка по цвету будет единой для всего фильма.
+    # absolute_solution_minimum = solution_min_value
+    # absolute_solution_maximum = solution_max_value
+
+   
+
+    #Вызываем рисовалку срезов по времени в цикле.
     for i in range(0, len(solution), t_step):
-        draw2DSlice(solution[i], i * t_grid_step, x_start, x_end, y_start, legend, np.min(np.min(solution[i])), np.max(np.max(solution[i])), 
+        #Если откомментили это, значит вы готовы к мигающему фону. Закомментите инициализацию этих же переменных прямо перед циклом
+        #Нормировка по цвету будет выполняться отдельно для каждого кадра
+        absolute_solution_minimum = np.min(np.min(solution[i]))
+        absolute_solution_maximum = np.max(np.max(solution[i]))
+        draw2DSlice(solution[i], i * t_grid_step, x_start, x_end, y_start, legend, absolute_solution_minimum, absolute_solution_maximum, 
                     time_marker_length)
     #Рисуем гифку из содержимого папки img\, сохраняем ее туда же.      
     images = []
