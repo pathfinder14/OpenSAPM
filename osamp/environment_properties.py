@@ -193,15 +193,15 @@ class EnvironmentProperties:
         return field
 
 
-# # density = 1000
-# # x_velocity = 200
-# # y_velocity = 400
-# # mu_lame = 56
-# # elasticity_quotient = 0
-# # props = environment_properties(density, elasticity_quotient, mu_lame)
-# # field = props.create_environment_for_acoustic()
-# # print(field.shape)
-#
+# density = 1000
+# x_velocity = 200
+# y_velocity = 400
+# mu_lame = 56
+# elasticity_quotient = 12
+# props = EnvironmentProperties(density, elasticity_quotient, mu_lame)
+# field = props.create_environment_for_seismic()
+# print(field)
+# #
 # image_path = "three_col.jpg"
 # params = {(254, 242, 0): [1, 200, 30], (255, 255, 255): [2, 100, 10]}
 # properties = EnvironmentProperties(img_creating_parameters=params)

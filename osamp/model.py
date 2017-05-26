@@ -12,24 +12,17 @@ class Model:
         self.arg = config
         self._type_problem = config['type']
         self._dim = config['dimension']
+        self._image_path = config['image_path']
         self._elasticity_quotient = config['elasticity_quotient']
         self.env_prop = env.EnvironmentProperties(
             config['density'], config['elasticity_quotient'], config['mu_lame'],
             config['x_velocity'], config['x_velocity'])
-        if self._type_problem == "acoustic":
-            self.field = self.env_prop.create_environment_for_acoustic(x=grid_size, y=grid_size)
-        if self._type_problem == "seismic":
-            self.field = self.env_prop.create_environment_for_seismic(x=grid_size, y=grid_size)
         self._lamda_matrix = \
-            matrix.get_matrix(self._dim, self._type_problem, self.env_prop.elasticity_quotient,
-                              self.env_prop.density, self.env_prop.mu_lame)
+            matrix.get_matrix(self._dim, self._type_problem, self.env_prop, grid_size, grid_size)
         self._omega_matrix = \
-            matrix.get_eign_matrix(self._dim, self._type_problem, self.env_prop.elasticity_quotient,
-                                   self.env_prop.density, self.env_prop.mu_lame)
+            matrix.get_eign_matrix(self._dim, self._type_problem, self.env_prop, grid_size, grid_size)
         self._inverse_omega_matrix = \
-            matrix.get_inv_eign_matrix(self._dim, self._type_problem, self.env_prop.elasticity_quotient,
-                                       self.env_prop.density, self.env_prop.mu_lame)
-
+            matrix.get_inv_eign_matrix(self._dim, self._type_problem, self.env_prop, grid_size, grid_size)
 
     @property
     def lambda_matrix(self):

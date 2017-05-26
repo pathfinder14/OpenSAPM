@@ -1,6 +1,7 @@
-dimension 2
-type seismic
+dimension 1
+type acoustic
 method kir
+image_path three_col.jpg
 elasticity_quotient 1
 mu_lame 1
 density 1

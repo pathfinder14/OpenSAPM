@@ -57,7 +57,7 @@ def border_condition_1d(grid, type_of_task, border_left, border_right, method_na
         - 'force_right' - applied force at the right border
     """
     if type_of_task == ProblemTypes.ACOUSTIC:
-        return border_condition_1d_acoustic(grid, border_left, border_right, method_name, force_left, force_right)
+        return border_condition_1d_acoustic(grid, type_of_task, border_left, border_right, method_name, force_left, force_right)
     elif type_of_task == ProblemTypes.SEISMIC:
         return border_condition_1d_seismic(grid, border_left, border_right, method_name, force_left, force_right)
 
