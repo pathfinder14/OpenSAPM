@@ -33,7 +33,7 @@ class SolverMethods:
 
     @classmethod
     def get_cells_amount_left(cls, method_name):
-        return cls.cells_for_method[method_name][0]
+        return SolverMethods.cells_for_method[method_name][0]
 
     @classmethod
     def get_cells_amount_right(cls, method_name):
@@ -132,7 +132,7 @@ def border_condition_1d_seismic(arr, type_of_task, border_left, border_right, me
                                         force_right)
 
 
-def border_condition_2d_acoustic(grid, type_of_task, border_left, border_right, method_name, direction=Directions.X,
+def border_condition_2d_acoustic(grid, border_left, border_right, method_name, direction=Directions.X,
                                  force_left=0, force_right=0):
     cells_left = SolverMethods.get_cells_amount_left(method_name)
     cells_right = SolverMethods.get_cells_amount_right(method_name)
