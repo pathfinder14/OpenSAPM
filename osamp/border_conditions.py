@@ -143,9 +143,14 @@ def border_condition_2d_acoustic(grid, type_of_task, border_left, border_right, 
 
     if border_left == ConditionNames.REFLECTION_CONDITION:
         for i in range(cells_left - 1, -1, -1):
+            if direction == Directions.X:
+                grid_new[i][v] = -grid[cells_left - 1 - i][v]
+                grid_new[i][u] = grid[cells_left - 1 - i][u]
+            else:
+                grid_new[i][v] = grid[cells_left - 1 - i][v]
+                grid_new[i][u] = -grid[cells_left - 1 - i][u]
             grid_new[i][p] = grid[cells_left - 1 - i][p]
-            grid_new[i][v] = -grid[cells_left - 1 - i][v]
-            grid_new[i][u] = -grid[cells_left - 1 - i][u]
+
 
     elif border_left == ConditionNames.CYCLE_CONDITION:
         for i in range(cells_left - 1, -1, -1):
@@ -168,9 +173,13 @@ def border_condition_2d_acoustic(grid, type_of_task, border_left, border_right, 
     # Check right border.
     if border_right == ConditionNames.REFLECTION_CONDITION:
         for i in range(cells_right - 1, -1, -1):
+            if direction == Directions.X:
+                grid_new[i][v] = -grid[len(grid) - 1 - i][v]
+                grid_new[i][u] = grid[len(grid) - 1 - i][u]
+            else:
+                grid_new[i][v] = grid[len(grid) - 1 - i][v]
+                grid_new[i][u] = -grid[len(grid) - 1 - i][u]
             grid_new[i][p] = grid[len(grid) - 1 - i][p]
-            grid_new[i][v] = -grid[len(grid) - 1 - i][v]
-            grid_new[i][u] = -grid[len(grid) - 1 - i][u]
 
     elif border_right == ConditionNames.CYCLE_CONDITION:
         for i in range(cells_right - 1, -1, -1):
