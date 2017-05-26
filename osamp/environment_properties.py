@@ -6,7 +6,14 @@ visual_analyzer = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(visual_analyzer)
 
 class EnvironmentProperties:
+    """
+        This is the main class, which models the environment field with input parameters
+    """
 
+    # Constructor
+    # The environment can be set from picture or analytically
+    # The environment can be homogeneous or heterogeneous
+    # Parameters can be constants or variable
     def __init__(self, density=0, lambda_lame=0, mu_lame=0, x_velocity=0, y_velocity=0,
                  img_creating_parameters=None, analytical_creating_parameters=None):
         if img_creating_parameters is not None:
@@ -32,19 +39,23 @@ class EnvironmentProperties:
             self.set_dens_and_speeds_for_seismic(density, x_velocity, y_velocity)
 
 
+    # Sets all parameters for acoustic, knowing v_p
     def set_params_for_acoustic_using_v_p(self):
         self.__calculate_params_for_acoustic_task_v_p()
 
+    # Sets all parameters for acoustic, knowing v_p
     def set_params_for_acoustic_using_k(self):
         self.__calculate_params_for_acoustic_task_k()
 
-
+    # Sets all parameters for seismic, knowing lame coefficients
     def set_params_for_seismic_using_lame(self):
         self.__calculate_params_for_seismic_task_vp_vs()
 
+    # Sets all parameters for seismic, knowing v_p and v_s
     def set_params_for_seismic_using_speeds(self):
         self.__calculate_params_for_seismic_task_lame()
 
+    # Calculate and sets density, elasticity_quotient and mu_lame coefficient for seismic task
     def set_dens_and_lame_for_seismic(self, density, elasticity_quotient, mu_lame):
         self.density = density
         self.elasticity_quotient = elasticity_quotient
@@ -52,28 +63,33 @@ class EnvironmentProperties:
         self.__calculate_Puass_and_E()
         self.__calculate_speeds()
 
+    # Calculate and sets density and elasticity_quotient for acoustic task
     def set_dens_and_lame_for_acoustic(self, density, elasticity_quotient):
         self.density = density
         self.elasticity_quotient = elasticity_quotient
         self.x_velocity = (elasticity_quotient/density) ** 0.5
 
+    # Calculate and sets density, x and y velocities for seismic task
     def set_dens_and_speeds_for_seismic(self, density, x_velocity, y_velocity):
         self.density = density
         self.x_velocity = x_velocity
         self.y_velocity = y_velocity
         self.__calculate_Lame_and_Puass_and_E()
 
+    # Calculate and sets density and x velocity for acoustic task
     def set_dens_and_speeds_for_acoustic(self, density, x_velocity):
         self.density = density
         self.x_velocity = x_velocity
         self.elasticity_quotient = (x_velocity**2) * density
 
+    # Returns all parameters in dictionary
     def get_get_all_params(self):
         params = {'Density = ': self.density, 'Lambda_Lame = ': self.elasticity_quotient, 'Mu_Lame = ': self.mu_lame,
                   'x_velocity = ': self.x_velocity, 'y_velocity = ': self.y_velocity,
                   'E = ': self.E, 'nu_puass = ': self.nu_puass}
         return params
 
+    # Calculates all parameters for acoustic_task in heterogeneous environment, knowing v_p
     def __calculate_params_for_acoustic_task_v_p(self):
         for buf_color in self.init_params.keys():
             init_params = self.init_params.get(buf_color)
@@ -82,6 +98,7 @@ class EnvironmentProperties:
             elasticity_quotient = self.__calculate_lambda_lame(density, x_velocity)
             self.img_creating_parameters.update({buf_color: [density, elasticity_quotient, x_velocity]})
 
+    # Calculates all parameters for acoustic_task in heterogeneous environment, knowing elasticity_quotient
     def __calculate_params_for_acoustic_task_k(self):
         for buf_color in self.init_params.keys():
             init_params = self.init_params.get(buf_color)
@@ -90,14 +107,17 @@ class EnvironmentProperties:
             x_velocity = self.__calculate_v_p(density, elasticity_quotient)
             self.img_creating_parameters.update({buf_color: [density, elasticity_quotient, x_velocity]})
 
+    # Calculates lambda_lame, knowing density and x_velocity
     def __calculate_lambda_lame(self, density, x_velocity):
         elasticity_quotient = (x_velocity ** 2) * density
         return elasticity_quotient
 
+    # Calculates x_velocity, knowing density and elasticity_quotient
     def __calculate_v_p(self, density, elasticity_quotient):
         v_p = (elasticity_quotient / density) ** 0.5
         return v_p
 
+    # Calculates all parameters for seismic_task in heterogeneous environment, knowing x and y velocities
     def __calculate_params_for_seismic_task_vp_vs(self):
         for buf_color in self.init_params.keys():
             init_params = self.init_params.get(buf_color)
@@ -109,6 +129,7 @@ class EnvironmentProperties:
             lambda_lame = self.elasticity_quotient
             self.img_creating_parameters.update({buf_color: [density, lambda_lame, mu_lame, v_p, v_s]})
 
+    # Calculates all parameters for seismic_task in heterogeneous environment, knowing lame parameters
     def __calculate_params_for_seismic_task_lame(self):
         for buf_color in self.init_params.keys():
             init_params = self.init_params.get(buf_color)
@@ -120,20 +141,24 @@ class EnvironmentProperties:
             v_s = self.y_velocity
             self.img_creating_parameters.update({buf_color: [density, lambda_lame, mu_lame, v_p, v_s]})
 
+    # Calculates Lame parameters, Puasson's parameter and E parameter
     def __calculate_Lame_and_Puass_and_E(self):
         self.mu_lame = self.y_velocity ** 2 * self.density
         self.nu_puass = (2 * self.mu_lame - self.x_velocity ** 2 * self.density) / (2 * (self.mu_lame - self.x_velocity ** 2 * self.density))
         self.elasticity_quotient = 2 * self.mu_lame * self.nu_puass / (1 - 2 * self.nu_puass)
         self.E = self.mu_lame * (3 * self.elasticity_quotient + 2 * self.mu_lame) / (self.elasticity_quotient + self.mu_lame)
 
+    # Calculates x and y velocities
     def __calculate_speeds(self):
         self.x_velocity = (self.E / self.density) ** 0.5
         self.y_velocity = (self.mu_lame / self.density) ** 0.5
 
+    # Calculates Puasson's parameter and E parameter
     def __calculate_Puass_and_E(self):
         self.nu_puass = self.elasticity_quotient / (2 * (self.elasticity_quotient + self.mu_lame))
         # self.E = self.mu_lame * (3 * self.elasticity_quotient + 2 * self.mu_lame) / (self.elasticity_quotient + self.mu_lame)
         self.E = self.elasticity_quotient * (1 + self.nu_puass) * (1 - 2*self.nu_puass)/(self.nu_puass)
+
 
 
     def create_environment_for_seismic(self, x=15, y=15):
