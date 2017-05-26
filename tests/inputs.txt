@@ -1,9 +1,10 @@
-dimension 2
+dimension 1
 type acoustic
 method kir
-elasticity_quotient 0.3
-mu_lame 100
-density 0.1
+image_path three_col.jpg
+elasticity_quotient 1
+mu_lame 1
+density 1
 x_velocity 0
 y_velocity 0
 source spherical

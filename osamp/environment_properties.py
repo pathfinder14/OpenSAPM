@@ -7,10 +7,13 @@ spec.loader.exec_module(visual_analyzer)
 
 class EnvironmentProperties:
 
-    def __init__(self, density = 0, lambda_lame=0, mu_lame=0, x_velocity=0, y_velocity=0, img_creating_parameters=None):
+    def __init__(self, density=0, lambda_lame=0, mu_lame=0, x_velocity=0, y_velocity=0,
+                 img_creating_parameters=None, analytical_creating_parameters=None):
         if img_creating_parameters is not None:
             self.init_params = dict(img_creating_parameters)
             self.img_creating_parameters = dict(img_creating_parameters)
+        if analytical_creating_parameters is not None:
+            self.analytical_creating_parameters = analytical_creating_parameters
         self.density = density
         self.lambda_lame = lambda_lame
         self.elasticity_quotient = lambda_lame
@@ -133,7 +136,7 @@ class EnvironmentProperties:
         self.E = self.elasticity_quotient * (1 + self.nu_puass) * (1 - 2*self.nu_puass)/(self.nu_puass)
 
 
-    def create_environment_for_seismic(self, x=1000, y=1000):
+    def create_environment_for_seismic(self, x=15, y=15):
         """
                 One of the main functions in class <Environment_properties> which returns the created environment field
                 for seismic task according to the pack of input parameters:
@@ -151,7 +154,7 @@ class EnvironmentProperties:
         field.fill(square)
         return field
 
-    def create_environment_for_acoustic(self, x=100, y=100):
+    def create_environment_for_acoustic(self, x=15, y=15):
         """
                 One of the main function in class <Environment_properties> which returns the created environment field
                 for acoustic task according to the pack of input parameters:
@@ -190,15 +193,15 @@ class EnvironmentProperties:
         return field
 
 
-# # density = 1000
-# # x_velocity = 200
-# # y_velocity = 400
-# # mu_lame = 56
-# # elasticity_quotient = 0
-# # props = environment_properties(density, elasticity_quotient, mu_lame)
-# # field = props.create_environment_for_acoustic()
-# # print(field.shape)
-#
+# density = 1000
+# x_velocity = 200
+# y_velocity = 400
+# mu_lame = 56
+# elasticity_quotient = 12
+# props = EnvironmentProperties(density, elasticity_quotient, mu_lame)
+# field = props.create_environment_for_seismic()
+# print(field)
+# #
 # image_path = "three_col.jpg"
 # params = {(254, 242, 0): [1, 200, 30], (255, 255, 255): [2, 100, 10]}
 # properties = EnvironmentProperties(img_creating_parameters=params)

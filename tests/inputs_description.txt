@@ -3,6 +3,7 @@ parameter:                    | values(separated with ' '):
 dimension                     | 1 2
 type                          | seismic, acoustic
 method                        | kir
+image_path                    | three_col.jpg
 elasticity_quotient           | 0 if x_velocity or y_velocity are equal to 0
 mu_lame                       | 0 for acoustic
 density                       |

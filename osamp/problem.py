@@ -32,10 +32,12 @@ class Problem(object):
 
     def __init__(self, params = None):
         if params is None:
-            params =  {}
+            params = {}
         self.params = params
         self._dimension = int(params['dimension'])
         self._type = params['type']
+        if params['image_path'] is not None:
+            self._image_path = params['image_path']
         self._density = float(params['density'])
         self._mu_lame = float(params['mu_lame'])
         self._elasticity_quotient = float(params['elasticity_quotient'])
@@ -117,12 +119,13 @@ class Problem(object):
         result_model = model.Model({
             "dimension" : self._dimension,
             "type" : self._type,
+            "image_path" : self._image_path,
             "elasticity_quotient": self._elasticity_quotient,
             "mu_lame": self._mu_lame,
             "density": self._density,
             "x_velocity": self._x_velocity,
             "y_velocity": self._y_velocity
-        })
+        }, self.GRID_SIZE)
         return result_model
 
 

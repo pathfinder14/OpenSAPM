@@ -99,10 +99,9 @@ class Solver:
             for k in range(len(grid_next_t)):#recieve Riman's invariant
                 grid_next_t[k] = np.dot(inv_matrix, grid_next_t[k]) 
             result_grid[i] = grid_next_t
-            #print(result_grid[i]) #TODO return grid to postprocess
+            
         postprocess.do_postprocess(result_grid, float(self.buffering_step), 0, 2300, self.type, time_step)
         return result_grid
-
         #TODO add saving to file every N time steps
 
 
