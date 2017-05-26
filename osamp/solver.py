@@ -192,6 +192,6 @@ class Solver:
                 self.problem._method, self.tension)
 
     def _generate_right_border_conditions(self, grid):
-        return border_conditions.border_condition(grid, self.problem._type,  "applied_force","cycle",
-                                        self.problem._method, self.tension, force_left=100)
+        return border_conditions.border_condition(grid, self.problem._type,  "applied_force","applied_force",
+                                        self.problem._method, self.tension, force_left=0)
 
