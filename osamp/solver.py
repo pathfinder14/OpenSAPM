@@ -163,10 +163,10 @@ class Solver:
         grid = self._grid
         source_of_grid = self.source
         spatial_step = 1
-        self.time_step = 1
+        self.time_step = 20
         #for t in range(1, grid.shape[0]):
         ##get only pressure values : array[:, 0]
-        time = np.arange(0, 500, self.time_step)
+        time = np.arange(0, 400, self.time_step)
         result_of_iteration_grid = np.zeros((len(time), grid.shape[0], grid.shape[1], grid.shape[2]))
         #do iter
         for i in range(len(time)):
@@ -192,6 +192,6 @@ class Solver:
                 self.problem._method, self.tension)
 
     def _generate_right_border_conditions(self, grid):
-        return border_conditions.border_condition(grid, self.problem._type,  "applied_force","cycle",
-                                        self.problem._method, self.tension, force_left=100)
+        return border_conditions.border_condition(grid, self.problem._type,  "applied_force","applied_force",
+                                        self.problem._method, self.tension, force_left=0)
 
