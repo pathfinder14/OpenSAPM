@@ -28,7 +28,7 @@ class Problem(object):
     border conditions
     """
 
-    GRID_SIZE = 15
+    GRID_SIZE = 55
 
     def __init__(self, params = None):
         if params is None:

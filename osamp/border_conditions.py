@@ -57,9 +57,9 @@ def border_condition_1d(grid, type_of_task, border_left, border_right, method_na
         - 'force_right' - applied force at the right border
     """
     if type_of_task == ProblemTypes.ACOUSTIC:
-        return border_condition_1d_acoustic(grid, border_left, border_right, method_name, force_left, force_right)
+        return border_condition_1d_acoustic(grid, type_of_task, border_left, border_right, method_name, force_left, force_right)
     elif type_of_task == ProblemTypes.SEISMIC:
-        return border_condition_1d_seismic(grid, border_left, border_right, method_name, force_left, force_right)
+        return border_condition_1d_seismic(grid, type_of_task, border_left, border_right, method_name, force_left, force_right)
 
 
 def border_condition_2d(grid, type_of_task, border_left, border_right, method_name, force_top):
@@ -132,6 +132,7 @@ def border_condition_1d_acoustic(grid, type_of_task, border_left, border_right, 
 
 
 def border_condition(grid, type_of_task, border_left, border_right, method_name, tension, force_left=0, force_right=0):
+    """Border condition for 2d equation"""
     cells_left = SolverMethods.get_cells_amount_left(method_name)
     cells_right = SolverMethods.get_cells_amount_right(method_name)
 
@@ -201,9 +202,9 @@ def border_condition(grid, type_of_task, border_left, border_right, method_name,
     ext_grid = np.concatenate((ext_grid, grid_new), axis=0)
     return ext_grid
 
-def border_condition_1d_seismic(arr, border_left, border_right, method_name, force_left, force_right):
+def border_condition_1d_seismic(arr, type_of_task, border_left, border_right, method_name, force_left, force_right):
     # for 1d seismic and acoustic conditions are the same
-    return border_condition_1d_acoustic(arr, border_left, border_right, method_name, force_left, force_right)
+    return border_condition_1d_acoustic(arr, type_of_task, border_left, border_right, method_name, force_left, force_right)
 
 
 def border_condition_2d_acoustic(grid, border_left, border_right, method_name, force_top):

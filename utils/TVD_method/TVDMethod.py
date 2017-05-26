@@ -22,9 +22,9 @@ limitter - выбор лимиттера, может принимать след
     'VanLeer'
 '''
 def TVDMethod(a,dt,dx, u, limitter): #,u0,u):
-    a_m = min(0,a)
-    a_p = max(0,a)
-    n = len(u[0])
+    a_m = np.min(a)
+    a_p = np.max(a)
+    n = np.size(u[0])
 
     # Инициализация векторов
     r = np.zeros((1,n), dtype=np.float)
@@ -87,7 +87,7 @@ def TVDMethod(a,dt,dx, u, limitter): #,u0,u):
         for j in range(n):
              phi[0][j] = (float(r[0][j]) + abs(float(r[0][j])))/(1 + abs(float(r[0][j]))) # Van Leer
     else:
-        print "ERROR: invalid limitter!"
+        print("ERROR: invalid limitter!")
         return 0
 
     for j in range (1, n-1):

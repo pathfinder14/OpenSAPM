@@ -16,6 +16,10 @@ spec = importlib.util.spec_from_file_location("bicompact", "../utils/bicompact_m
 bicompact = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(bicompact)
 
+spec = importlib.util.spec_from_file_location("tvd", "../utils/TVD_method/TVDMethod.py")
+tvd = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(tvd)
+
 p = 0  # index of pressure in values array
 v = 1  # index of velocity in values array
 
@@ -41,9 +45,8 @@ class Solver:
         self.buffering_step = Problem._buffering_step
         self.x_velocity = Problem.model.env_prop.x_velocity
         self.tension = Problem.tension
-        self.time_step = self.cfl*self.problem._grid._dx/self.x_velocity
         self.spatial_step = 1
-
+        self.time_step = self.cfl*self.spatial_step/self.x_velocity
         if self._dimension == 1:
             self.solve_1D()
         else:
@@ -63,38 +66,43 @@ class Solver:
         #let's imagine that grid has not information about time
         #for t in range(1, grid.shape[0]):
         ##get only pressure values : array[:, 0]
-        time = np.arange(0, 50, time_step)
+        #time_step = 1
+        time = np.arange(0, 100, time_step)
         result_grid = np.zeros((len(time), grid.shape[0], grid.shape[1]))
 
         for i in range(len(time)):
             grid_prev_t = grid_next_t
-            grid_prev_t = self._generate_border_conditions(grid_prev_t)
-            source_of_grid.update_source_in_grid(grid_prev_t) ##TODO
+
+            #grid_prev_t = self._generate_border_conditions(grid_prev_t)
+            ##for seismic
+            grid_prev_t =  border_conditions.border_condition_1d(grid_prev_t, self.problem._type, "applied_force","absorb", 
+                                            self.problem._method, force_left=100)
+            source_of_grid.update_source_in_grid(grid_prev_t)
             #source_of_grid.update_source_in_grid(grid_next_t) ##TODO
 
             for k in range(len(grid_prev_t)):#recieve Riman's invariant
                 grid_prev_t[k] = np.dot(omega_matrix, grid_prev_t[k])
+            #TODO add new method
+
             if(self.problem._method == 'kir'):
                 for index in self.tension.values():
                     grid_next_t[:, index] = kir.kir(grid_prev_t.shape[0], grid_prev_t[:,index], matrix_of_eigns[index][index], time_step, spatial_step)
-                #grid_next_t[:, p] = kir.kir(grid_prev_t.shape[0], grid_prev_t[:, p], matrix_of_eigns[p][p], time_step, spatial_step)
-                #grid_next_t[:, v] = kir.kir(grid_prev_t.shape[0], grid_prev_t[:, v], matrix_of_eigns[v][v], time_step, spatial_step)
 
             elif(self.problem._method == 'beam_warming'):
                 grid_next_t = beam_warming.beam_warming(matrix_of_eigns, time_step, spatial_step, grid_prev_t)
-                #TODO add new method
+
             elif(self.problem._method == 'bicompact'):
-                grid_next_t[:, p] = bicompact.bicompact_method(matrix_of_eigns[p][p], time_step, spatial_step, grid_prev_t[:, p], grid_next_t[:, p])
-                grid_next_t[:, v] = bicompact.bicompact_method(matrix_of_eigns[v][v], time_step, spatial_step, grid_prev_t[:, v], grid_next_t[:, v])
-                grid_next_t = grid_next_t[1:-1]
+                for index in self.tension.values():
+                    grid_next_t[:, index] = bicompact.bicompact_method(matrix_of_eigns[index][index], time_step, spatial_step, grid_prev_t[:, index])
             else:
                 raise Exception('Unknown method name: ' + self.problem._method)
             for k in range(len(grid_next_t)):#recieve Riman's invariant
                 grid_next_t[k] = np.dot(inv_matrix, grid_next_t[k]) 
             result_grid[i] = grid_next_t
-        #print(result_grid) #TODO return grid to postprocess
+            #print(result_grid[i]) #TODO return grid to postprocess
+        postprocess.do_postprocess(result_grid, float(self.buffering_step), 0, 2300, self.type, time_step)
         return result_grid
-        #postprocess.do_postprocess(result_grid, float(self.buffering_step), -300, 300, "acoustic", time_step)
+
         #TODO add saving to file every N time steps
 
 
@@ -104,11 +112,12 @@ class Solver:
     def solve_2D_seismic(self):
         pass
 
-    def solve_2D(self):
-        self.splitting_method()
-        pass
+
 
     def solve_splitted_2D(self, type_of_task, real_grid):
+        """
+        Method for splitted 2d problem to two 1d equation on one time slice
+        """
         grid_next = np.zeros_like(real_grid[0])
         grid_prev = np.zeros_like(real_grid[0])
         j = 0
@@ -130,6 +139,15 @@ class Solver:
             if(self.problem._method == 'kir'):
                 for index in self.tension.values():
                     grid_next[:, index] = kir.kir(grid_prev.shape[0], grid_prev[:,index], self.matrix_of_eigns[index][index], self.time_step, self.spatial_step)
+            elif(self.problem._method == 'bicompact'):
+                for index in self.tension.values():
+                    grid_next[:, index] = bicompact.bicompact_method(self.matrix_of_eigns[index][index], self.time_step, self.spatial_step, grid_prev[:, index])
+            elif(self.problem._method == 'beam_warming'):
+                grid_next = beam_warming.beam_warming(self.matrix_of_eigns, self.time_step, self.spatial_step, grid_prev)        
+            elif(self.problem._method == 'tvd'):
+                    grid_next= tvd.TVDMethod(self.matrix_of_eigns, self.time_step, self.spatial_step, grid_prev, 'MC')
+            else:
+                raise Exception('Unknown method name: ' + self.problem._method)
             for k in range(grid_next.shape[0]):#recieve Riman's invariant
                  grid_next[k] = np.dot(self.inv_matrix, grid_next[k])
             if (i % 2 == 0):
@@ -142,27 +160,25 @@ class Solver:
 
         return real_grid
 
-    def splitting_method(self):
+    def solve_2D(self):
         grid = self._grid
         source_of_grid = self.source
         spatial_step = 1
         self.time_step = 1
         #for t in range(1, grid.shape[0]):
         ##get only pressure values : array[:, 0]
-        time = np.arange(0, 100, self.time_step)
+        time = np.arange(0, 500, self.time_step)
         result_of_iteration_grid = np.zeros((len(time), grid.shape[0], grid.shape[1], grid.shape[2]))
         #do iter
         for i in range(len(time)):
             grid_n = self.solve_splitted_2D(self.type, grid)
             result_of_iteration_grid[i] = grid_n
         print(result_of_iteration_grid)
+        postprocess.do_2_postprocess(result_of_iteration_grid[:,:,:,2], float(self.buffering_step), 0, 50, 50, "kaka", np.min(np.min(np.min(result_of_iteration_grid[:,:,:,2]))), np.max(np.max(np.max(result_of_iteration_grid[:,:,:,2]))),self.time_step)
         #Create time array 
 
 
     def _generate_border_conditions(self, grid):
-        # for i in range(len(grid[0])):
-        #     grid[0][i] = [1,1]
-        # return 
         if self._dimension == 1:
             return border_conditions.border_condition_1d(
                 grid, self.problem._type,
@@ -177,5 +193,6 @@ class Solver:
                 self.problem._method, self.tension)
 
     def _generate_right_border_conditions(self, grid):
-        return border_conditions.border_condition(grid, self.problem._type, "applied_force","absorb",
+        return border_conditions.border_condition(grid, self.problem._type,  "applied_force","cycle",
                                         self.problem._method, self.tension, force_left=100)
+
