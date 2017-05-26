@@ -12,6 +12,10 @@ spec = importlib.util.spec_from_file_location("kir", "../utils/convection_diffus
 beam_warming = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(beam_warming)
 
+spec = importlib.util.spec_from_file_location("weno", "../utils/WENO_method/WENOmethod.py")
+weno = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(weno)
+
 
 class Solver:
     """
@@ -61,7 +65,8 @@ class Solver:
                 grid[t] = kir.kir(grid.shape[1], grid[t-1], matrix_of_eigns, time_step, spatial_step)
             elif(self.problem._method == 'beam_warming'):
                 grid_next_t = beam_warming.beam_warming(matrix_of_eigns, time_step, spatial_step, grid_prev_t)
-
+            elif(self.problem._method == 'weno'):
+                grid_next_t = weno.WENOmethod(matrix_of_eigns, time_step, spatial_step, grid_prev_t)
             else:
                 raise Exception('Unknown method name: ' + self.problem._method)
             for k in range(len(grid_next_t)):#recieve Riman's invariant

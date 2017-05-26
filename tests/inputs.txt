@@ -1,6 +1,6 @@
 dimension 1
 type acoustic
-method beam_warming
+method weno
 elasticity_quotient 1
 mu_lame 0
 density 100
