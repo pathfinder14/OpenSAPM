@@ -1,9 +1,11 @@
+import numpy as np
+
 def ENOweights(k,r):
     #Purpose: compute weights c_rk in ENO expansion 
     # v_[i+1/2] = \sum_[j=0]^[k-1] c_[rj] v_[i-r+j]
     #where k = order and r = shift 
 
-    c = zeros(k)
+    c = np.zeros(k)
 
     for j in range(0,k):
             de3 = 0.
@@ -43,7 +45,7 @@ def nddp(X,Y):
 
     n = len(X)
 
-    DD = zeros((n,n+1))
+    DD = np.zeros((n,n+1))
 
     #inserting x into 1st column of DD-table 
     DD[:,0]=X
@@ -70,13 +72,13 @@ def ENO(xloc, uloc, k):
         ur = uloc[0]
 
     #Apply ENO procedure 
-    S = zeros(k,dtype=int)
+    S = np.zeros(k,dtype=int)
     S[0] = k
     for kk in range (0,k-1):
         #print 'S:',S
         #left stencil
-        xvec = zeros(k)
-        uvec = zeros(k)
+        xvec = np.zeros(k)
+        uvec = np.zeros(k)
         Sindxl = append(S[0]-1, S[0:kk+1])-1
         xvec = xloc[Sindxl]
         uvec = uloc[Sindxl]
@@ -84,8 +86,8 @@ def ENO(xloc, uloc, k):
         Vl = abs(DDl[0,kk+2])
 
         #right stencil 
-        xvec = zeros(k)
-        uvec = zeros(k)
+        xvec = np.zeros(k)
+        uvec = np.zeros(k)
         Sindxr = append(S[0:kk+1], S[kk]+1)-1
         xvec = xloc[Sindxr]
         uvec = uloc[Sindxr]
@@ -125,17 +127,17 @@ def WENO(xloc, uloc, k):
         ur = uloc[1]
 
     #Apply WENO procedure 
-    alphal = zeros(k)
-    alphar = zeros(k)
-    omegal = zeros(k)
-    omegar = zeros(k)
-    beta = zeros(k)
-    d = zeros(k)
+    alphal = np.zeros(k)
+    alphar = np.zeros(k)
+    omegal = np.zeros(k)
+    omegar = np.zeros(k)
+    beta = np.zeros(k)
+    d = np.zeros(k)
     vareps= 1e-6
 
     #Compute k values of xl and xr based on different stencils 
-    ulr = zeros(k)
-    urr = zeros(k)
+    ulr = np.zeros(k)
+    urr = np.zeros(k)
 
     for r in  range(0,k):
         cr = ENOweights(k,r)
