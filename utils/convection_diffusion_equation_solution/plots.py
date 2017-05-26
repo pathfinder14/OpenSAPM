@@ -63,3 +63,16 @@ t.testing(method = 'Fedorenko', initial =  'peak', velocity = 'func')
 t.testing(method = 'Fedorenko', initial =  'rectangle', velocity = 'const')
 t.testing(method = 'Fedorenko', initial =  'rectangle', velocity = 'x')
 t.testing(method = 'Fedorenko', initial =  'rectangle', velocity = 'func')
+
+
+t.testing(method = 'Rusanov', initial =  'sin', velocity = 'const')
+t.testing(method = 'Rusanov', initial =  'sin', velocity = 'x')
+t.testing(method = 'Rusanov', initial =  'sin', velocity = 'func')
+
+t.testing(method = 'Rusanov', initial =  'peak', velocity = 'const')
+t.testing(method = 'Rusanov', initial =  'peak', velocity = 'x')
+t.testing(method = 'Rusanov', initial =  'peak', velocity = 'func')
+
+t.testing(method = 'Rusanov', initial =  'rectangle', velocity = 'const')
+t.testing(method = 'Rusanov', initial =  'rectangle', velocity = 'x')
+t.testing(method = 'Rusanov', initial =  'rectangle', velocity = 'func')
