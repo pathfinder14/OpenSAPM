@@ -1,66 +1,32 @@
 import numpy as np
 
-def ENOweights(k,r):
-    #Purpose: compute weights c_rk in ENO expansion 
-    # v_[i+1/2] = \sum_[j=0]^[k-1] c_[rj] v_[i-r+j]
-    #where k = order and r = shift 
 
-    c = np.zeros(k)
-
-    for j in range(0,k):
-            de3 = 0.
-            for m in range(j+1,k+1):
-                #compute denominator 
-                de2 = 0.
-                for l in range(0,k+1):
-                    #print 'de2:',de2
-                    if l is not m:
-                        de1 = 1.
-                        for q in range(0,k+1):
-                            #print 'de1:',de1
-                            if (q is not m) and (q is not l):
-                                de1 = de1*(r-q+1)
-
-
-                        de2 = de2 + de1
-
-
-                #compute numerator 
-                de1 = 1.
-                for l in range(0,k+1):
-                    if (l is not m):
-                        de1 = de1*(m-l)
-
-                de3 = de3 + de2/de1
-
-
-            c[j] = de3
-
-
-    return c
-
-
-def WENO(xloc, uloc, k):
+def WENO(a, tau, h, u):
     #Purpose: compute the left and right cell interface values using ENO 
     #approach based on 2k-1 long vectors uloc with cell k 
 
     #treat special case of k = 1 no stencil to select 
+    k = int((len(u) + 1) / 2) 
+    print(k)
+    uloc = u
+
+
     if (k==1):
         ul = uloc[0]
         ur = uloc[1]
 
     #Apply WENO procedure 
-    alphal = np.zeros(k)
-    alphar = np.zeros(k)
-    omegal = np.zeros(k)
-    omegar = np.zeros(k)
-    beta = np.zeros(k)
-    d = np.zeros(k)
+    alphal = np.zeros(k, dtype=np.float)
+    alphar = np.zeros(k, dtype=np.float)
+    omegal = np.zeros(k, dtype=np.float)
+    omegar = np.zeros(k, dtype=np.float)
+    beta = np.zeros(k, dtype=np.float)
+    d = np.zeros(k, dtype=np.float)
     vareps= 1e-6
 
     #Compute k values of xl and xr based on different stencils 
-    ulr = np.zeros(k)
-    urr = np.zeros(k)
+    ulr = np.zeros(k, dtype=np.float)
+    urr = np.zeros(k, dtype=np.float)
 
     for r in  range(0,k):
         cr = ENOweights(k,r)
@@ -105,3 +71,42 @@ def WENO(xloc, uloc, k):
         ur = ur + omegar[r]*urr[r]
 
     return (ul,ur)
+
+def ENOweights(k,r):
+    #Purpose: compute weights c_rk in ENO expansion 
+    # v_[i+1/2] = \sum_[j=0]^[k-1] c_[rj] v_[i-r+j]
+    #where k = order and r = shift 
+
+    c = np.zeros(k)
+
+    for j in range(0,k):
+            de3 = 0.
+            for m in range(j+1,k+1):
+                #compute denominator 
+                de2 = 0.
+                for l in range(0,k+1):
+                    #print 'de2:',de2
+                    if l is not m:
+                        de1 = 1.
+                        for q in range(0,k+1):
+                            #print 'de1:',de1
+                            if (q is not m) and (q is not l):
+                                de1 = de1*(r-q+1)
+
+
+                        de2 = de2 + de1
+
+
+                #compute numerator 
+                de1 = 1.
+                for l in range(0,k+1):
+                    if (l is not m):
+                        de1 = de1*(m-l)
+
+                de3 = de3 + de2/de1
+
+
+            c[j] = de3
+
+
+    return c

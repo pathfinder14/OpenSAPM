@@ -5,10 +5,13 @@ from eno_weno_routines import *
 
 nx = 81
 dx = 2./(nx-1)
+h = dx
 x = np.linspace(0,2,nx)
 nt = 25    
 dt = .02  
+tau = dt
 c = 1.      #assume wavespeed of c = 1
+a = c
 u = np.zeros((1,nx))
 for i in range(int(nx/2)):
     u[0][i] = 1
@@ -32,9 +35,9 @@ flux = np.zeros(nx+2*gc)
 for n in range(1,nt):  
     un = uc.copy() 
     for i in range(gc,nx-1+gc): #i=2
-        xloc = xc[i-(k-1):i+k] #i+k-1-(i-(k-1)-1) = 2k -1 
+        xloc = xc[i-(k-1):i+k]  #i+k-1-(i-(k-1)-1) = 2k -1 
         uloc = uc[i-(k-1):i+k]
-        f_left,f_right = WENO(xloc,uloc,k)
+        f_left,f_right = WENO(a, tau, h, uloc)
         #upwind flux
         flux[i]=0.5*(c+np.fabs(c))*f_left + 0.5*(c-np.fabs(c))*f_right
 
