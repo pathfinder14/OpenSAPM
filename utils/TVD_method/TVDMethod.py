@@ -22,9 +22,8 @@ limitter - выбор лимиттера, может принимать след
     'VanLeer'
 '''
 def TVDMethod(a,dt,dx, u, limitter): #,u0,u):
-    a_m = np.min(a)
-    a_p = np.max(a)
-    n = np.size(u[0])
+
+    n = len(u[0])
 
     # Инициализация векторов
     r = np.zeros((1,n), dtype=np.float)
@@ -40,9 +39,9 @@ def TVDMethod(a,dt,dx, u, limitter): #,u0,u):
     for j in range(1, n - 1):           
         if u[0][j] == u[0][j+1]:
             r[0][j] = 1
-        elif a > 0:
+        elif a[0][0] > 0:
             r[0][j] = (float(u[0][j]) - float(u[0][j-1])) / (float(u[0][j+1]) - float(u[0][j]))
-        elif a < 0:    
+        elif a[0][0] < 0:    
             r[0][j] = (float(u[0][j+2]) - float(u[0][j+1])) / (float(u[0][j+1]) - float(u[0][j]))
         r[0][0] = 1.0; r[0][n - 1] = 1.0
 
@@ -91,11 +90,14 @@ def TVDMethod(a,dt,dx, u, limitter): #,u0,u):
         return 0
 
     for j in range (1, n-1):
+        a_m = min(0,a[0][j])
+        a_p = max(0,a[0][j])
+        
         # Вычисление антидиффузионных потоков   
         F_rl[0][j] = float(a_p)*float(u[0][j]) + float(a_m)*float(u[0][j+1])
-        F_rh[0][j] = 0.5*float(a)*(float(u[0][j])+float(u[0][j+1])) - 0.5*(float(a) * float(a))*(dt/dx)*(float(u[0][j+1])-float(u[0][j]))           
+        F_rh[0][j] = 0.5*float(a[0][j])*(float(u[0][j])+float(u[0][j+1])) - 0.5*(float(a[0][j]) * float(a[0][j]))*(dt/dx)*(float(u[0][j+1])-float(u[0][j]))           
         F_ll[0][j] = float(a_p)*float(u[0][j-1]) + float(a_m)*float(u[0][j])
-        F_lh[0][j] = 0.5*float(a)*(float(u[0][j-1])+float(u[0][j])) - 0.5*(float(a) * float(a))*(dt/dx)*(float(u[0][j])-float(u[0][j-1]))
+        F_lh[0][j] = 0.5*float(a[0][j])*(float(u[0][j-1])+float(u[0][j])) - 0.5*(float(a[0][j]) * float(a[0][j]))*(dt/dx)*(float(u[0][j])-float(u[0][j-1]))
             
         # Вычисление слудующего шага по времени   
         F_right[0][j] = float(F_rl[0][j]) + float(phi[0][j])*( float(F_rh[0][j]) - float(F_rl[0][j]) )
@@ -107,4 +109,3 @@ def TVDMethod(a,dt,dx, u, limitter): #,u0,u):
     for i in range(n-2):
         u1[0][i] = u_next[0][i+1]
     return u1
-
