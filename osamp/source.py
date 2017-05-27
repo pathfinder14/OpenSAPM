@@ -27,9 +27,9 @@ class Source:
         if grid.shape[1] == 2:
             grid[self.coordinates] = np.array([100, 20])
         elif grid.shape[1] == 3:
-            grid[self.coordinates]   = np.array([100, 100, 100])
+            grid[self.coordinates]   = np.array([100, 0, 0])
         else:
-            grid[self.coordinates]   = np.array([100, 30, 20,0,0])
+            grid[self.coordinates]   = np.array([100, 0, 0,0,0])
         #grid[self.coordinates - 1] = np.array([100*np.cos(15),20*np.cos(15)])
         #grid[self.coordinates + 1] = np.array([100*np.cos(15),20*np.cos(15)])
         return grid

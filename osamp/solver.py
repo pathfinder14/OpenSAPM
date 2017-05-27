@@ -129,7 +129,6 @@ class Solver:
         grid_next = np.zeros_like(real_grid[0])
         grid_prev = np.zeros_like(real_grid[0])
         j = 0
-
         for i in range(2*real_grid.shape[0]):
             #grid[3][3] = np.array([1, 20, 20])
             
@@ -171,11 +170,12 @@ class Solver:
     def solve_2D(self):
         grid = self._grid
         source_of_grid = self.source
-        spatial_step = 1
-        self.time_step = 2
+        self.time_step = 0.01
+        self.spatial_step = 0.1
+
         #for t in range(1, grid.shape[0]):
         ##get only pressure values : array[:, 0]
-        time = np.arange(0, 200, self.time_step)
+        time = np.arange(0, 20, self.time_step)
         result_of_iteration_grid = np.zeros((len(time), grid.shape[0], grid.shape[1], grid.shape[2]))
         #do iter
         for i in range(len(time)):
@@ -202,5 +202,5 @@ class Solver:
 
     def _generate_right_border_conditions(self, grid):
         return border_conditions.border_condition_2d(grid, self.problem._type,  "applied_force","applied_force",
-                                        self.problem._method,  force_left=0)
+                                        self.problem._method,  force_left=20)
 

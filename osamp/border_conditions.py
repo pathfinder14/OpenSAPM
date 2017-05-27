@@ -28,8 +28,9 @@ class SolverMethods:
     BEAM_WARMING = 'beam_warming'
     KIR = 'kir'
     TVD = 'tvd'
+    WENO = 'weno'
 
-    cells_for_method = {BIOCOMPACT: (1, 1), LAX_WENDROFF: (3, 3), BEAM_WARMING: (1, 1), KIR: (1, 1), TVD: (1, 1)}
+    cells_for_method = {BIOCOMPACT: (1, 1), LAX_WENDROFF: (3, 3), BEAM_WARMING: (1, 1), KIR: (1, 1), TVD: (1, 1), WENO: (1, 1)}
 
     @classmethod
     def get_cells_amount_left(cls, method_name):
