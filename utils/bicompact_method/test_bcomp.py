@@ -1,55 +1,166 @@
+import matplotlib.pyplot as plt
+import math as math
+from bicompact import bicompact_method
 import numpy as np
-from bicompact import bicompactMethod
+'''
+Тест для функции решения уравнения переноса (TVD)
+'''
 
-a=1
-tau=1
-h=1
-x1 = np.arange(0,10,h)
-for i in range(x1.size):
-	x1[i] = 0
-x0 = np.arange(0,10,h)
 
-bicompactMethod(a,tau,h,x0,x1)
+aTestList = ['const','tear', 'hat']
+uTestList = ['step', 'gauss', 'peak']
 
-a=1
-tau=1
-h=1
-x1 = np.arange(0,9,h)
-for i in range(x1.size):
-	x1[i] = 0
-x0 = np.arange(0,9,h)
+for aIndex in range(len(aTestList)):
+        for uIndex in range(len(uTestList)):
+            aTest = aTestList[aIndex] # параметр a
+            uTest = uTestList[uIndex] # начальное условие            
+            
+            a0 = -0.5
+            left = 1.0 # пределы по оси x
+            right = 5.0
+            dx = 0.01
+            cfl = 0.09
+            dt = cfl*dx/abs(a0)
+            t_end = 0.6 # Время (t_end / dt задает количество итераций)
+            n = int((right - left) / dx)
+            a = np.zeros(n)
+            # Задание параметра a
+            if aTest == 'const': # постоянный параметр
+                for i in range(int(n/2)):
+                    a[i] = 0.5
+                for i in range(int(n/2), n):
+                    a[i] = 0.5
+            elif aTest == 'tear': # разрыв
+                for i in range(int(n/2)):
+                    a[i] = 0.5
+                for i in range(int(n/2), n):
+                    a[i] = 1
+            elif aTest == 'hat': # "шляпка"
+                mu = (right + left) / 2.0
+                for i in range(n):
+                    a[i] =  0.5 + 0.5/(1 + 100*(left + i*dx - mu)*(left + i*dx - mu))
 
-bicompactMethod(a,tau,h,x0,x1)
+            # Задание тестовой функции
+            u_0 = np.zeros(n)
+            u0 = np.zeros(n)
+            if uTest == 'step': # ступенька
+                for i in range(int(n/50)):
+                    u_0[i] = 1
+                for i in range(int(n/50), int(n/3)):
+                    u_0[i] = 2
+                for i in range(int(n/3), n):
+                    u_0[i] = 1
+            elif uTest == 'gauss': # функция Гаусса
+                sigma = 0.02
+                pi = 3.14
+                # mu = 1.5
+                mu = left + (right - left) / 2.5
+                for i in range(n):
+                    u_0[i] = 1.0 + 0.05 * 1.0 / (sigma * math.sqrt(2*pi)) * math.exp(-((left + i*dx - mu)*(left + i*dx - mu)) / (2.0 * sigma * sigma))
+            elif uTest == 'peak': # пик
+                sigma = 0.1
+                pi = 3.14
+                # mu = 1.5
+                mu = left + (right - left) / 2.5
+                delta = (mu - left) / 2.0
+                length = right - left
+                for i in range(int(delta/length * n), int(3 * delta/length * n)): # пик на финитном носителе
+                    if (left + i*dx - mu) == 0.0:
+                        u_0[i] = 1.0
+                    else:
+                        u_0[i] = math.sin(100*(left + i*dx - mu)) / (100*(left + i*dx - mu))
+                
+            for i in range(n):
+                u0[i] = u_0[i]
+                
+            u = np.zeros(n, dtype=np.float)
+            x = np.zeros(n, dtype=np.float)
 
-from math import *
-from tkinter import *
-
-f = bicompactMethod(a,tau,h,x0,x1)
-
-root = Tk()
-
-canv = Canvas(root, width = 1000, height = 1000, bg = "white")
-canv.create_line(500,1000,500,0,width=2,arrow=LAST) 
-canv.create_line(0,500,1000,500,width=2,arrow=LAST) 
-
-First_x = -500;
-
-for i in range(16000):
-	if (i % 800 == 0):
-		k = First_x + (1 / 16) * i
-		canv.create_line(k + 500, -3 + 500, k + 500, 3 + 500, width = 0.5, fill = 'black')
-		canv.create_text(k + 515, -10 + 500, text = str(k), fill="purple", font=("Helvectica", "10"))
-		if (k != 0):
-			canv.create_line(-3 + 500, k + 500, 3 + 500, k + 500, width = 0.5, fill = 'black')
-			canv.create_text(20 + 500, k + 500, text = str(k), fill="purple", font=("Helvectica", "10"))
-	try:
-		x = First_x + (1 / 16) * i
-		new_f = f.replace('x', str(x))
-		y = -eval(new_f) + 500
-		x += 500
-		canv.create_oval(x, y, x + 1, y + 1, fill = 'black')
-	except:
-		pass
-canv.pack()	
-root.mainloop()
-
+            # Вычисление u
+            ut1 = np.zeros(n, dtype=np.float)
+            ut2 = np.zeros(n, dtype=np.float)
+            ut3 = np.zeros(n, dtype=np.float)
+            
+            #отработка метода на векторе параметров
+            for k in range(int(t_end / dt)):
+                
+                for j in range (u0.size-5):
+                    tmpx1 = np.copy(u[j:j+3])
+                    tmp = bicompact_method(a[j+1],dt,dx,u0[j:j+3],tmpx1)
+                    u[j+1] = tmp[0] 
+                            
+                for i in range(n-2):
+                    u0[i+1] = u[i]
+                # Граничные условия
+                u0[0] = u0[1]
+                u0[n-1] = u0[n-2]
+                if k == int(t_end / dt * 0.25):
+                    for i in range(n):
+                        ut1[i] = u0[i]
+                elif k == int(t_end / dt * 0.5):
+                    for i in range(n):
+                        ut2[i] = u0[i]
+                elif k == int(t_end / dt * 0.75):
+                    for i in range(n):
+                        ut3[i] = u0[i]
+                
+            # Инициализация вектора x для построения графика
+            j = 0
+            i= left
+            for j in range(n-2):
+                x[j] = i
+                j = j + 1
+                i = i + dx   
+            x1 = np.zeros(n, dtype=np.float) # длины n для построения графиков входных данных
+            x2 = np.ones(n, dtype=np.float) # для построения аналитического решения
+            j = 0
+            i= left
+            for j in range(n):
+                x1[j] = i
+                j = j + 1
+                i = i + dx            
+            j = 0
+            i = left + a[0] * t_end
+            while (j < n) and (i < right):
+                x2[j] = i
+                j = j + 1
+                i = i + dx
+            
+                
+            # Построение графика
+            plt.subplot(311)
+            plt.plot(x, u, label = 'x_1 (t = ' + str(t_end) + ')')
+           
+            if (aTest == 'const'):
+                plt.plot(x2, u_0, label = 'x (t = ' + str(t_end) + ')')
+                plt.axis([1.0,5.4,1.0,2.2])
+                if uTest == 'peak':
+                    plt.axis([1.0,5.4,-0.4,1.2])
+                
+            else:
+                plt.plot(x1, u_0, label = 'x_0 (t = 0)')
+            if uTest != 'peak':
+                plt.axis([1.0,5.4,1,2.2])
+            plt.legend(bbox_to_anchor=(0.35, 1), loc=1, borderaxespad=0.25)
+            plt.ylabel('x')
+            plt.xlabel('h')
+            
+            plt.subplot(312)
+            plt.plot(x1, u_0) 
+            plt.plot(x1, ut1, label = 'x (t = ' + str(t_end * 0.25) + ')')
+            plt.plot(x1, ut2, label = 'x(t = ' + str(t_end * 0.5) + ')')  
+            plt.plot(x1, ut3, label = 'x (t = ' + str(t_end * 0.75) + ')')  
+            plt.plot(x, u,label = 'x (t = ' + str(t_end) + ')')
+            if uTest != 'peak':
+                plt.axis([1.0,5.4,1,2.2])
+            plt.legend(bbox_to_anchor=(0.33, 1), loc=1, borderaxespad=0.25)
+            
+            plt.subplot(313)
+            plt.plot(x1, a, marker = '.', label = 'a')
+            plt.ylabel('a')
+            plt.xlabel('h')
+            plt.legend(bbox_to_anchor=(0.16, 1), loc=1, borderaxespad=0.25)
+            plt.savefig('plots/' + 'a_' + aTest + '_x0_' + uTest + '.png')
+            #plt.show()
+            plt.close()
+            

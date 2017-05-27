@@ -28,14 +28,16 @@ class Problem(object):
     border conditions
     """
 
-    GRID_SIZE = 5
+    GRID_SIZE = 100
 
     def __init__(self, params = None):
         if params is None:
-            params =  {}
+            params = {}
         self.params = params
         self._dimension = int(params['dimension'])
         self._type = params['type']
+        if params['image_path'] is not None:
+            self._image_path = params['image_path']
         self._density = float(params['density'])
         self._mu_lame = float(params['mu_lame'])
         self._elasticity_quotient = float(params['elasticity_quotient'])
@@ -45,10 +47,15 @@ class Problem(object):
         self._method = params['method']
         self._source = params['source']
         self._buffering_step = int(params['buffering_step'])
+        self._end_time = float(params['end_time'])
+        self._time_step = float(params['time_step'])
+        self._x_start = float(params['x_start'])
+        self._x_end = float(params['x_end'])
+        self._y_start = float(params['y_start'])
+        Problem.GRID_SIZE = int(params['grid_size'])
         self._left_boundary_conditions = params['left_boundary_conditions']
         self._right_boundary_conditions = params['right_boundary_conditions']
         self.source = self._produce_source_of_waves()
-        self._grid = self._define_grid()
         if (self.type == 'acoustic') & (self.dimension == 2):
             self.tension = {
             'p':0,
@@ -65,11 +72,16 @@ class Problem(object):
             'mu':0,
             'v':1
              }
-        elif (self.type == 'seismic') & (self.dimension == 2):
+        else:# (self.type == 'seismic') & (self.dimension == 2):
             self.tension = {
-            'p':0,
-            'v':1
+            'sigma11':0,
+            'sigma22':1,
+            'sigma21':2,
+            'u':3,
+            'v':4
              }
+        self._grid = self._define_grid()
+
         # print('Problem: ' + str(self))
 
     @property
@@ -103,7 +115,7 @@ class Problem(object):
             return grid.Grid((Problem.GRID_SIZE, self.dimension + 1))
         else:
             # TODO create Grid2d class and replace the following with it
-            return grid.Grid((Problem.GRID_SIZE, Problem.GRID_SIZE, self.dimension + 1))
+            return grid.Grid((Problem.GRID_SIZE, Problem.GRID_SIZE, len(self.tension)))
 
     def _assemble_model(self):
         """
@@ -113,12 +125,13 @@ class Problem(object):
         result_model = model.Model({
             "dimension" : self._dimension,
             "type" : self._type,
+            "image_path" : self._image_path,
             "elasticity_quotient": self._elasticity_quotient,
             "mu_lame": self._mu_lame,
             "density": self._density,
             "x_velocity": self._x_velocity,
             "y_velocity": self._y_velocity
-        })
+        }, self.GRID_SIZE)
         return result_model
 
 
