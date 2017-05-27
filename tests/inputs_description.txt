@@ -12,7 +12,9 @@ x_velocity                    | 0 if elasticity_quotient is not equal to 0
 y_velocity                    | 0 if elasticity_quotient is not equal to 0
 density                       |
 source                        | {point spherical}
-buffering_step                | number of iterations before part of the solution is written to buffer file
+buffering_step                | number of iterations before adding image to gif
+                              |     !!!(memoryError appears on too small value of buffering_step that does not allow to save
+                              |     !!!gif, still images are created properly)
 left_boundary_conditions      | reflection, cycle, absorb, applied_force
 right_boundary_conditions     | reflection, cycle, absorb, applied_force
 end_time                      |
