@@ -6,6 +6,7 @@ import McCormack as mc
 import beam_warming as bm
 import fedorenko as f
 import lax_wendroff as lw
+import rusanov as rus
 
 t = [0, 1]  # time interval
 x = [0, 1]  # x interval
@@ -105,11 +106,6 @@ def testing(method, initial, velocity):
             u[j][0] = 0
             u[j] = mc.McCormack(x_nods_quantity, u[j-1], transfer_velocity, tau, h)
 
-    elif method == 'Beam-Warming':
-        for j in range(1, n1-1):
-            u[j][0] = 0
-            u[j] = bm.beam_warming(tau, h, u[j-1], transfer_velocity)
-
     elif method == 'Lax-Wendroff':
         for j in range(1, n1-1):
             u[j][0] = 0
@@ -121,12 +117,15 @@ def testing(method, initial, velocity):
             u[j][0] = 0
             u[j] = f.fedorenko(grid = u[j-1], tau = tau, h = h)
 
-    """elif method == 'Rusanov':
-        for j in range(1, n1-1):
+    elif method == 'Beam-Warming':
+        for j in range(1, n1 - 1):
             u[j][0] = 0
-            u[j] = f.fedorenko(x_nods_quantity, grid = u[j-1], transfer_velocity[j], tau = tau, h = h)
-            """
+            u[j] = bm.beam_warming(tau, h, u[j - 1], transfer_velocity)
 
+    elif method == 'Rusanov':
+        for j in range(1, n1 - 1):
+            u[j][0] = 0
+            u[j] = rus.rusanov(tau, h, u[j - 1], transfer_velocity)
 
     fig = plt.figure()
     fig = fig.add_subplot(111)
