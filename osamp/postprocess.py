@@ -9,6 +9,7 @@ import shutil
 import glob
 
 def draw1DSlice(solution, t_slice, x_start, x_end, legend, solution_max_value):
+    print ('in draw 1d slice')
     M = len(solution)
     x_step = (x_end - x_start) / M
     x =  np.arange(x_start,x_end,x_step) 
@@ -49,26 +50,23 @@ def draw1DMovie(solution, t_filming_step, x_start, x_end, legend, t_grid_step):
     files = glob.glob('img' + os.sep + '*')
     for f in files:
         os.remove(f)
-        
-    #Перевели шаг из "реального времени" в шаг по массиву решения.
-    t_step = int(t_filming_step / t_grid_step)
-    t_step = int(t_grid_step * len(solution))
+
     #Вызываем рисовалку срезов по времени в цикле.
-    for i in range(0, len(solution), t_step):
+    for i in range(0, solution.shape[0], t_filming_step):
         draw1DSlice(solution[i], i * t_grid_step, x_start, x_end, legend, np.max(solution))
 
     #Рисуем гифку из содержимого папки img\, сохраняем ее туда же.      
     images = []
     filenames = sorted(fn for fn in os.listdir(path='img' + os.sep) if fn.endswith('.png'))
     for filename in filenames:
-        tmp = imageio.imread('img' + os.sep + filename)
-        images.append(tmp)
+        images.append(imageio.imread('img' + os.sep + filename))
     imageio.mimsave('img' + os.sep + 'movie.gif', images, duration = 0.1)
     
 
 
 def draw2DSlice(solution, t_slice, x_start, x_end, y_start, legend, solution_min_value, solution_max_value, 
-                time_marker_length): 
+                time_marker_length):
+    print('in draw 2d slice')
     npArray = np.array(solution)
     npArrayTransposed = npArray.transpose()
     y_end = 0
@@ -124,7 +122,7 @@ def draw2DSlice(solution, t_slice, x_start, x_end, y_start, legend, solution_min
     if not os.path.exists('img'):
         os.makedirs('img')
     
-    plt.savefig('img' + os.sep+legend + ' ' + str(t_slice)[:time_marker_length] + 's.png') # - если рисовать мувик, будет сохранять .png
+    plt.savefig('img' + os.sep+legend + ' ' + str(t_slice) + 's.png') # - если рисовать мувик, будет сохранять .png
     #plt.show() - если нужно отображать, не будет сохранять
 
 
@@ -161,10 +159,6 @@ def draw2DMovie(solution, t_filming_step, x_start, x_end, y_start, legend, solut
     files = glob.glob('img' + os.sep + '*')
     for f in files:
         os.remove(f)
-        
-    #Перевели шаг из "реального времени" в шаг по массиву решения.
-    t_step = int(t_filming_step / t_grid_step)
-
 
     #Если откомментили это, значит, вы готовы к тому, что малые значения сеточной функции отображаться не будут. 
     #Закомментите инициализацию этих же переменных в цикле.
@@ -172,16 +166,17 @@ def draw2DMovie(solution, t_filming_step, x_start, x_end, y_start, legend, solut
     # absolute_solution_minimum = solution_min_value
     # absolute_solution_maximum = solution_max_value
 
-   
-
     #Вызываем рисовалку срезов по времени в цикле.
-    for i in range(0, len(solution), t_step):
+    for i in range(0, solution.shape[0], t_filming_step):
         #Если откомментили это, значит вы готовы к мигающему фону. Закомментите инициализацию этих же переменных прямо перед циклом
         #Нормировка по цвету будет выполняться отдельно для каждого кадра
         absolute_solution_minimum = np.min(np.min(solution[i]))
         absolute_solution_maximum = np.max(np.max(solution[i]))
-        draw2DSlice(solution[i], i * t_grid_step, x_start, x_end, y_start, legend, absolute_solution_minimum, absolute_solution_maximum, 
+        draw2DSlice(solution[i], i * t_grid_step,
+                    x_start, x_end, y_start, legend,
+                    absolute_solution_minimum, absolute_solution_maximum,
                     time_marker_length)
+
     #Рисуем гифку из содержимого папки img\, сохраняем ее туда же.      
     images = []
     filenames = sorted(fn for fn in os.listdir(path='img' + os.sep) if fn.endswith('s.png'))

@@ -28,7 +28,7 @@ class Problem(object):
     border conditions
     """
 
-    GRID_SIZE = 15
+    GRID_SIZE = 100
 
     def __init__(self, params = None):
         if params is None:
@@ -46,7 +46,13 @@ class Problem(object):
         self._model = self._assemble_model()
         self._method = params['method']
         self._source = params['source']
-        self._buffering_step = float(params['buffering_step'])
+        self._buffering_step = int(params['buffering_step'])
+        self._end_time = float(params['end_time'])
+        self._time_step = float(params['time_step'])
+        self._x_start = float(params['x_start'])
+        self._x_end = float(params['x_end'])
+        self._y_start = float(params['y_start'])
+        Problem.GRID_SIZE = int(params['grid_size'])
         self._left_boundary_conditions = params['left_boundary_conditions']
         self._right_boundary_conditions = params['right_boundary_conditions']
         self.source = self._produce_source_of_waves()

@@ -37,21 +37,26 @@ class Solver:
     TODO In this task grid - it's a time slice
     """
 
-    def __init__(self, Problem):
+    def __init__(self, problem):
         self.cfl = 0.1 # TODO change this parametrs to user's propertyies
-        self._dimension = Problem.dimension
-        self.problem = Problem
-        self.matrix_of_eigns = Problem.model.lambda_matrix
-        self.omega_matrix = Problem.model.omega_matrix
-        self.inv_matrix = Problem.model.inverse_omega_matrix
-        self._grid = Problem._grid._grid
-        self.source = Problem.source
-        self.type = Problem._type
-        self.buffering_step = Problem._buffering_step
-        self.x_velocity = Problem.model.env_prop.x_velocity
-        self.tension = Problem.tension
+        self._dimension = problem.dimension
+        self.problem = problem
+        self.matrix_of_eigns = problem.model.lambda_matrix
+        self.omega_matrix = problem.model.omega_matrix
+        self.inv_matrix = problem.model.inverse_omega_matrix
+        self._grid = problem._grid._grid
+        self.source = problem.source
+        self.type = problem._type
+        self.buffering_step = problem._buffering_step
+        self.x_velocity = problem.model.env_prop.x_velocity
+        self.tension = problem.tension
+        self.time_step = problem._time_step
+        self.end_time = problem._end_time
+        self.x_start = problem._x_start
+        self.x_end = problem._x_end
+        self.y_start = problem._y_start
         self.spatial_step = 1
-        self.time_step = self.cfl*self.spatial_step/self.x_velocity
+        # self.time_step = self.cfl*self.spatial_step/self.x_velocity
         if self._dimension == 1:
             self.solve_1D()
         else:
@@ -61,8 +66,7 @@ class Solver:
     def solve_1D(self):
         grid = self._grid
         source_of_grid = self.source
-        spatial_step = 1
-        time_step = self.time_step
+        # time_step = self.time_step
         matrix_of_eigns = self.problem.model.lambda_matrix
         omega_matrix = self.problem.model.omega_matrix
         inv_matrix = self.problem.model.inverse_omega_matrix
@@ -71,8 +75,7 @@ class Solver:
         #let's imagine that grid has not information about time
         #for t in range(1, grid.shape[0]):
         ##get only pressure values : array[:, 0]
-        time_step = 1
-        time = np.arange(0, 100, time_step)
+        time = np.arange(0, self.end_time, self.time_step)
         result_grid = np.zeros((len(time), grid.shape[0], grid.shape[1]))
 
         for i in range(len(time)):
@@ -91,25 +94,31 @@ class Solver:
 
             if(self.problem._method == 'kir'):
                 for index in self.tension.values():
-                    grid_next_t[:, index] = kir.kir(grid_prev_t.shape[0], grid_prev_t[:,index], matrix_of_eigns[index][index], time_step, spatial_step)
+                    grid_next_t[:, index] = kir.kir(grid_prev_t.shape[0], grid_prev_t[:,index], matrix_of_eigns[index][index], self.time_step, self.spatial_step)
 
             elif(self.problem._method == 'beam_warming'):
-                grid_next_t = beam_warming.beam_warming(matrix_of_eigns, time_step, spatial_step, grid_prev_t)
+                grid_next_t = beam_warming.beam_warming(matrix_of_eigns, self.time_step, self.spatial_step, grid_prev_t)
                 
             elif(self.problem._method == 'weno'):
-                grid_next_t = weno.WENOmethod(matrix_of_eigns, time_step, spatial_step, grid_prev_t)
+                grid_next_t = weno.WENOmethod(matrix_of_eigns, self.time_step, self.spatial_step, grid_prev_t)
                 
             elif(self.problem._method == 'bicompact'):
                 for index in self.tension.values():
-                    grid_next_t[:, index] = bicompact.bicompact_method(matrix_of_eigns[index][index], time_step, spatial_step, grid_prev_t[:, index])
+                    grid_next_t[:, index] = bicompact.bicompact_method(matrix_of_eigns[index][index], self.time_step, self.spatial_step, grid_prev_t[:, index])
 
             else:
                 raise Exception('Unknown method name: ' + self.problem._method)
             for k in range(len(grid_next_t)):#recieve Riman's invariant
-                grid_next_t[k] = np.dot(inv_matrix, grid_next_t[k]) 
-            result_grid[i] = grid_next_t
-            
-        postprocess.do_postprocess(result_grid, float(self.buffering_step), 0, 2300, self.type, time_step)
+                grid_next_t[k] = np.dot(inv_matrix, grid_next_t[k])
+
+            if(i < result_grid.shape[0] - 1):
+                result_grid[i + 1] = grid_next_t
+
+        print('Result grid shape: ' + str(result_grid.shape))
+        postprocess.do_postprocess(result_grid, self.buffering_step,
+                                   self.x_start, self.x_end, self.type,
+                                   self.time_step)
+
         return result_grid
         #TODO add saving to file every N time steps
 
@@ -170,21 +179,27 @@ class Solver:
     def solve_2D(self):
         grid = self._grid
         source_of_grid = self.source
-        self.time_step = 0.01
-        self.spatial_step = 0.1
+        # self.time_step = 0.01
+        # self.spatial_step = 0.1
 
         #for t in range(1, grid.shape[0]):
         ##get only pressure values : array[:, 0]
-        time = np.arange(0, 20, self.time_step)
-        result_of_iteration_grid = np.zeros((len(time), grid.shape[0], grid.shape[1], grid.shape[2]))
+        time = np.arange(0, self.end_time, self.time_step)
+        result_grid = np.zeros((len(time), grid.shape[0], grid.shape[1], grid.shape[2]))
         #do iter
         for i in range(len(time)):
             grid_n = self.solve_splitted_2D(self.type, grid)
-            result_of_iteration_grid[i] = grid_n
-        print(result_of_iteration_grid)
-        postprocess.do_2_postprocess(result_of_iteration_grid[:,:,:,2], float(self.buffering_step), 0, 50, 50, self.problem.type, np.min(np.min(np.min(result_of_iteration_grid[:,:,:,2]))), np.max(np.max(np.max(result_of_iteration_grid[:,:,:,2]))),self.time_step)
-        #Create time array 
+            if(i < result_grid.shape[0] - 1):
+                result_grid[i] = grid_n
 
+        print('Result grid shape: ' + str(result_grid.shape))
+
+        postprocess.do_2_postprocess(result_grid[:,:,:,2], self.buffering_step,
+                                     self.x_start, self.x_end, self.y_start, self.problem.type,
+                                     np.min(np.min(np.min(result_grid[:,:,:,2]))),
+                                     np.max(np.max(np.max(result_grid[:,:,:,2]))),
+                                     self.time_step)
+        #Create time array
 
     def _generate_border_conditions(self, grid):
         if self._dimension == 1:

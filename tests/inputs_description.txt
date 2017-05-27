@@ -1,17 +1,24 @@
 parameter:                    | values(separated with ' '):
-------------------------------------------------------
-
-dimension                     | 1 2
+------------------------------------------------------------------------------------------------------------------------
+                              |
+dimension                     | {1 2}
 type                          | seismic, acoustic
-method                        | kir, weno
-image_path                    | three_col.jpg
+method                        | {kir weno bicompact}
+image_path                    | (example: three_col.jpg)
 elasticity_quotient           | 0 if x_velocity or y_velocity are equal to 0
 mu_lame                       | 0 for acoustic
 density                       |
 x_velocity                    | 0 if elasticity_quotient is not equal to 0
 y_velocity                    | 0 if elasticity_quotient is not equal to 0
 density                       |
-source                        | point spherical
+source                        | {point spherical}
 buffering_step                | number of iterations before part of the solution is written to buffer file
 left_boundary_conditions      | reflection, cycle, absorb, applied_force
 right_boundary_conditions     | reflection, cycle, absorb, applied_force
+end_time                      |
+time_step                     | step between time slices in solution (affects the precision)
+x_start                       |
+x_end                         |
+y_start                       |
+grid_size                     |
+------------------------------------------------------------------------------------------------------------------------
