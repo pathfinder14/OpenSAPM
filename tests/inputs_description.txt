@@ -3,13 +3,13 @@ parameter:                    | values(separated with ' '):
                               |
 dimension                     | {1 2}
 type                          | seismic, acoustic
-method                        | {kir weno bicompact}
+method                        | {kir weno bicompact beam_warming}
 image_path                    | (example: three_col.jpg)
-elasticity_quotient           | 0 if x_velocity or y_velocity are equal to 0
+elasticity_quotient           | 0 if v_p or v_s are equal to 0
 mu_lame                       | 0 for acoustic
 density                       |
-x_velocity                    | 0 if elasticity_quotient is not equal to 0
-y_velocity                    | 0 if elasticity_quotient is not equal to 0
+v_p                    | 0 if elasticity_quotient is not equal to 0
+v_s                    | 0 if elasticity_quotient is not equal to 0
 density                       |
 source                        | {point spherical}
 buffering_step                | number of iterations before adding image to gif

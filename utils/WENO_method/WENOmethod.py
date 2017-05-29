@@ -41,7 +41,7 @@ def WENOmethod(a, tau, h, u):
         else:
             uc[i] = un[i] - tau / h * (flux[i + 1] - flux[i])
 
-    return  uc[1:-1]
+    return  uc[3:-3]
 
 '''
 Функция вычисляет левые и правые границы клетки, используя ENO

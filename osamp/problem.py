@@ -41,8 +41,8 @@ class Problem(object):
         self._density = float(params['density'])
         self._mu_lame = float(params['mu_lame'])
         self._elasticity_quotient = float(params['elasticity_quotient'])
-        self._x_velocity = float(params['x_velocity'])
-        self._y_velocity = float(params['y_velocity'])
+        self._v_p = float(params['v_p'])
+        self._v_s = float(params['v_s'])
         self._model = self._assemble_model()
         self._method = params['method']
         self._source = params['source']
@@ -129,8 +129,8 @@ class Problem(object):
             "elasticity_quotient": self._elasticity_quotient,
             "mu_lame": self._mu_lame,
             "density": self._density,
-            "x_velocity": self._x_velocity,
-            "y_velocity": self._y_velocity
+            "v_p": self._v_p,
+            "v_s": self._v_s
         }, self.GRID_SIZE)
         return result_model
 

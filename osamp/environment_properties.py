@@ -14,7 +14,7 @@ class EnvironmentProperties:
     # The environment can be set from picture or analytically
     # The environment can be homogeneous or heterogeneous
     # Parameters can be constants or variable
-    def __init__(self, density=0, lambda_lame=0, mu_lame=0, x_velocity=0, y_velocity=0,
+    def __init__(self, density=0, lambda_lame=0, mu_lame=0, v_p=0, v_s=0,
                  img_creating_parameters=None, analytical_creating_parameters=None):
         if img_creating_parameters is not None:
             self.init_params = dict(img_creating_parameters)
@@ -25,18 +25,18 @@ class EnvironmentProperties:
         self.lambda_lame = lambda_lame
         self.elasticity_quotient = lambda_lame
         self.mu_lame = mu_lame
-        self.x_velocity = x_velocity
-        self.y_velocity = y_velocity
+        self.v_p = v_p
+        self.v_s = v_s
         self.E = 0
         self.nu_puass = 0
-        if x_velocity == 0 and y_velocity == 0 and mu_lame == 0 and lambda_lame != 0:
+        if v_p == 0 and v_s == 0 and mu_lame == 0 and lambda_lame != 0:
             self.set_dens_and_lame_for_acoustic(density, lambda_lame)
-        if x_velocity == 0 and y_velocity == 0 and mu_lame != 0 and lambda_lame != 0:
+        if v_p == 0 and v_s == 0 and mu_lame != 0 and lambda_lame != 0:
             self.set_dens_and_lame_for_seismic(density, lambda_lame, mu_lame)
-        if x_velocity != 0 and y_velocity == 0 and mu_lame == 0 and lambda_lame == 0:
-            self.set_dens_and_speeds_for_acoustic(density, x_velocity)
-        if x_velocity != 0 and y_velocity != 0 and mu_lame == 0 and lambda_lame == 0:
-            self.set_dens_and_speeds_for_seismic(density, x_velocity, y_velocity)
+        if v_p != 0 and v_s == 0 and mu_lame == 0 and lambda_lame == 0:
+            self.set_dens_and_speeds_for_acoustic(density, v_p)
+        if v_p != 0 and v_s != 0 and mu_lame == 0 and lambda_lame == 0:
+            self.set_dens_and_speeds_for_seismic(density, v_p, v_s)
 
 
     # Sets all parameters for acoustic, knowing v_p
@@ -67,25 +67,25 @@ class EnvironmentProperties:
     def set_dens_and_lame_for_acoustic(self, density, elasticity_quotient):
         self.density = density
         self.elasticity_quotient = elasticity_quotient
-        self.x_velocity = (elasticity_quotient/density) ** 0.5
+        self.v_p = (elasticity_quotient/density) ** 0.5
 
     # Calculate and sets density, x and y velocities for seismic task
-    def set_dens_and_speeds_for_seismic(self, density, x_velocity, y_velocity):
+    def set_dens_and_speeds_for_seismic(self, density, v_p, v_s):
         self.density = density
-        self.x_velocity = x_velocity
-        self.y_velocity = y_velocity
+        self.v_p = v_p
+        self.v_s = v_s
         self.__calculate_Lame_and_Puass_and_E()
 
     # Calculate and sets density and x velocity for acoustic task
-    def set_dens_and_speeds_for_acoustic(self, density, x_velocity):
+    def set_dens_and_speeds_for_acoustic(self, density, v_p):
         self.density = density
-        self.x_velocity = x_velocity
-        self.elasticity_quotient = (x_velocity**2) * density
+        self.v_p = v_p
+        self.elasticity_quotient = (v_p**2) * density
 
     # Returns all parameters in dictionary
     def get_get_all_params(self):
         params = {'Density = ': self.density, 'Lambda_Lame = ': self.elasticity_quotient, 'Mu_Lame = ': self.mu_lame,
-                  'x_velocity = ': self.x_velocity, 'y_velocity = ': self.y_velocity,
+                  'v_p = ': self.v_p, 'v_s = ': self.v_s,
                   'E = ': self.E, 'nu_puass = ': self.nu_puass}
         return params
 
@@ -94,9 +94,9 @@ class EnvironmentProperties:
         for buf_color in self.init_params.keys():
             init_params = self.init_params.get(buf_color)
             density = init_params[0]
-            x_velocity = init_params[1]
-            elasticity_quotient = self.__calculate_lambda_lame(density, x_velocity)
-            self.img_creating_parameters.update({buf_color: [density, elasticity_quotient, x_velocity]})
+            v_p = init_params[1]
+            elasticity_quotient = self.__calculate_lambda_lame(density, v_p)
+            self.img_creating_parameters.update({buf_color: [density, elasticity_quotient, v_p]})
 
     # Calculates all parameters for acoustic_task in heterogeneous environment, knowing elasticity_quotient
     def __calculate_params_for_acoustic_task_k(self):
@@ -104,15 +104,15 @@ class EnvironmentProperties:
             init_params = self.init_params.get(buf_color)
             density = init_params[0]
             elasticity_quotient = init_params[1]
-            x_velocity = self.__calculate_v_p(density, elasticity_quotient)
-            self.img_creating_parameters.update({buf_color: [density, elasticity_quotient, x_velocity]})
+            v_p = self.__calculate_v_p(density, elasticity_quotient)
+            self.img_creating_parameters.update({buf_color: [density, elasticity_quotient, v_p]})
 
-    # Calculates lambda_lame, knowing density and x_velocity
-    def __calculate_lambda_lame(self, density, x_velocity):
-        elasticity_quotient = (x_velocity ** 2) * density
+    # Calculates lambda_lame, knowing density and v_p
+    def __calculate_lambda_lame(self, density, v_p):
+        elasticity_quotient = (v_p ** 2) * density
         return elasticity_quotient
 
-    # Calculates x_velocity, knowing density and elasticity_quotient
+    # Calculates v_p, knowing density and elasticity_quotient
     def __calculate_v_p(self, density, elasticity_quotient):
         v_p = (elasticity_quotient / density) ** 0.5
         return v_p
@@ -137,21 +137,21 @@ class EnvironmentProperties:
             lambda_lame = init_params[1]
             mu_lame = init_params[2]
             self.set_dens_and_lame_for_seismic(density, lambda_lame, mu_lame)
-            v_p = self.x_velocity
-            v_s = self.y_velocity
+            v_p = self.v_p
+            v_s = self.v_s
             self.img_creating_parameters.update({buf_color: [density, lambda_lame, mu_lame, v_p, v_s]})
 
     # Calculates Lame parameters, Puasson's parameter and E parameter
     def __calculate_Lame_and_Puass_and_E(self):
-        self.mu_lame = self.y_velocity ** 2 * self.density
-        self.nu_puass = (2 * self.mu_lame - self.x_velocity ** 2 * self.density) / (2 * (self.mu_lame - self.x_velocity ** 2 * self.density))
+        self.mu_lame = self.v_s ** 2 * self.density
+        self.nu_puass = (2 * self.mu_lame - self.v_p ** 2 * self.density) / (2 * (self.mu_lame - self.v_p ** 2 * self.density))
         self.elasticity_quotient = 2 * self.mu_lame * self.nu_puass / (1 - 2 * self.nu_puass)
         self.E = self.mu_lame * (3 * self.elasticity_quotient + 2 * self.mu_lame) / (self.elasticity_quotient + self.mu_lame)
 
     # Calculates x and y velocities
     def __calculate_speeds(self):
-        self.x_velocity = (self.E / self.density) ** 0.5
-        self.y_velocity = (self.mu_lame / self.density) ** 0.5
+        self.v_p = (self.E / self.density) ** 0.5
+        self.v_s = (self.mu_lame / self.density) ** 0.5
 
     # Calculates Puasson's parameter and E parameter
     def __calculate_Puass_and_E(self):
@@ -165,16 +165,16 @@ class EnvironmentProperties:
         """
                 One of the main functions in class <Environment_properties> which returns the created environment field
                 for seismic task according to the pack of input parameters:
-                        (density, x_velocity, v_c) or (density, elasticity_quotient, mu_lame)
+                        (density, v_p, v_c) or (density, elasticity_quotient, mu_lame)
 
-                Each element of returned <ndarray> contains list [x_velocity, y_velocity, density, elasticity_quotient, mu_lame]
+                Each element of returned <ndarray> contains list [v_p, v_s, density, elasticity_quotient, mu_lame]
                         which will be used in further calculations
 
                 :param x:   Width
                 :param y:   Height
                 :return field:    numpy.ndarray(shape=(x, y))
         """
-        square = [self.x_velocity, self.y_velocity, self.density, self.elasticity_quotient, self.mu_lame]
+        square = [self.v_p, self.v_s, self.density, self.elasticity_quotient, self.mu_lame]
         field = np.ndarray(shape=(x, y), dtype=np.dtype(list))
         field.fill(square)
         return field
@@ -183,16 +183,16 @@ class EnvironmentProperties:
         """
                 One of the main function in class <Environment_properties> which returns the created environment field
                 for acoustic task according to the pack of input parameters:
-                        (density, x_velocity) or (density, k)
+                        (density, v_p) or (density, k)
 
-                Each element of returned <ndarray> contains list [x_velocity, density, k]
+                Each element of returned <ndarray> contains list [v_p, density, k]
                         which will be used in further calculations
 
                 :param x:   Width
                 :param y:   Height
                 :return field:    numpy.ndarray(shape=(x, y))
         """
-        square = [self.x_velocity, self.density, self.elasticity_quotient]
+        square = [self.v_p, self.density, self.elasticity_quotient]
         field = np.ndarray(shape=(x, y), dtype=np.dtype(list))
         field.fill(square)
         return field
@@ -203,12 +203,12 @@ class EnvironmentProperties:
                         gathered from the picture with describes the environment
                         with proper parameters for seismic task for each
                         pixel<->(density, elasticity_quotient, mu_lame)
-                        or pixel<->(density, x_velocity, v_c) or correspondingly for acoustic task :
-                        pixel<->(density, x_velocity) or pixel<->(density, k)
+                        or pixel<->(density, v_p, v_c) or correspondingly for acoustic task :
+                        pixel<->(density, v_p) or pixel<->(density, k)
 
                         Each element of returned <array> contains corresponding list with parameters:
-                        [density, elasticity_quotient, mu_lame, x_velocity, y_velocity] for seismic and
-                        [density=0, elasticity_quotient=0, x_velocity=0] for acoustic
+                        [density, elasticity_quotient, mu_lame, v_p, v_s] for seismic and
+                        [density=0, elasticity_quotient=0, v_p=0] for acoustic
 
                         :param image_path: The relative path to the image, which describes the environment
                         :return field:    numpy.ndarray(shape=(height, length)); each element of array contains properties of environment
@@ -219,8 +219,8 @@ class EnvironmentProperties:
 
 
 # density = 1000
-# x_velocity = 200
-# y_velocity = 400
+# v_p = 200
+# v_s = 400
 # mu_lame = 56
 # elasticity_quotient = 12
 # props = EnvironmentProperties(density, elasticity_quotient, mu_lame)

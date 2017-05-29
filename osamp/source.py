@@ -15,7 +15,7 @@ class Source:
     """This class is responsible for creating external sources of waves"""
     def __init__(self, type):
         self._type = type
-        self.coordinates = 6
+        self.coordinates = 10
         self._source = self._get_source_by_type(type)
 
     # TODO: make return valid value

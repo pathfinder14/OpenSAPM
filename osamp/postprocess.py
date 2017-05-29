@@ -113,7 +113,7 @@ def draw2DSlice(solution, t_slice, x_start, x_end, y_start, legend, solution_min
     # границ levels указываются в самом методе contour. 
     
     #Привязываем границы по значениям зон нашей боковой шкалы к цветам.
-    cs = ax.contourf(solution, levels, cmap=cmap, norm=norm, extend='both') 
+    cs = ax.contourf(solution, levels, cmap=cmap, norm=norm, extend='both')
     cbar = fig.colorbar(cs, ax=ax, spacing='proportional',   # сделаем цветовые сегменты шкалы пропоциональными границам levels
                     extendfrac='auto',   # изменим длину треугольных индикаторов
                     orientation='vertical') # можно изменить положение шкалы на горизонтальное (horizontal)

@@ -16,7 +16,7 @@ class Model:
         self._elasticity_quotient = config['elasticity_quotient']
         self.env_prop = env.EnvironmentProperties(
             config['density'], config['elasticity_quotient'], config['mu_lame'],
-            config['x_velocity'], config['x_velocity'])
+            config['v_p'], config['v_p'])
         self._lamda_matrix = \
             matrix.get_matrix(self._dim, self._type_problem, self.env_prop, grid_size, grid_size)
         self._omega_matrix = \

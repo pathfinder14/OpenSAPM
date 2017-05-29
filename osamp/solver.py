@@ -48,7 +48,7 @@ class Solver:
         self.source = problem.source
         self.type = problem._type
         self.buffering_step = problem._buffering_step
-        self.x_velocity = problem.model.env_prop.x_velocity
+        self.v_p = problem.model.env_prop.v_p
         self.tension = problem.tension
         self.time_step = problem._time_step
         self.end_time = problem._end_time
@@ -56,7 +56,7 @@ class Solver:
         self.x_end = problem._x_end
         self.y_start = problem._y_start
         self.spatial_step = 1
-        # self.time_step = self.cfl*self.spatial_step/self.x_velocity
+        # self.time_step = self.cfl*self.spatial_step/self.v_p
         if self._dimension == 1:
             self.solve_1D()
         else:
@@ -81,10 +81,10 @@ class Solver:
         for i in range(len(time)):
             grid_prev_t = grid_next_t
 
-            #grid_prev_t = self._generate_border_conditions(grid_prev_t)
+            grid_prev_t = self._generate_border_conditions(grid_prev_t)
             ##for seismic
-            grid_prev_t =  border_conditions.border_condition_1d(grid_prev_t, self.problem._type, "applied_force","absorb", 
-                                            self.problem._method, force_left=100)
+            # grid_prev_t =  border_conditions.border_condition_1d(grid_prev_t, self.problem._type, "applied_force","absorb",
+            #                                 self.problem._method, force_left=100)
             source_of_grid.update_source_in_grid(grid_prev_t)
             #source_of_grid.update_source_in_grid(grid_next_t) ##TODO
 
@@ -97,11 +97,12 @@ class Solver:
                     grid_next_t[:, index] = kir.kir(grid_prev_t.shape[0], grid_prev_t[:,index], matrix_of_eigns[index][index], self.time_step, self.spatial_step)
 
             elif(self.problem._method == 'beam_warming'):
-                grid_next_t = beam_warming.beam_warming(matrix_of_eigns, self.time_step, self.spatial_step, grid_prev_t)
+                grid_next_t = beam_warming.beam_warming(self.time_step, self.spatial_step, grid_prev_t, matrix_of_eigns)
                 
             elif(self.problem._method == 'weno'):
-                grid_next_t = weno.WENOmethod(matrix_of_eigns, self.time_step, self.spatial_step, grid_prev_t)
-                
+                for index in self.tension.values():
+                    grid_next_t[:, index] = weno.WENOmethod(matrix_of_eigns[index][index], self.time_step, self.spatial_step, grid_prev_t[:,index])
+
             elif(self.problem._method == 'bicompact'):
                 for index in self.tension.values():
                     grid_next_t[:, index] = bicompact.bicompact_method(matrix_of_eigns[index][index], self.time_step, self.spatial_step, grid_prev_t[:, index])
@@ -141,7 +142,7 @@ class Solver:
         for i in range(2*real_grid.shape[0]):
             #grid[3][3] = np.array([1, 20, 20])
             
-            self.source.update_source_in_grid(real_grid[3])
+            self.source.update_source_in_grid(real_grid[10])
             if (i % 2 == 0):
                 grid_prev = real_grid[j, :]
                 grid_prev = self._generate_border_conditions(grid_prev)
@@ -216,6 +217,6 @@ class Solver:
                 self.problem._method)
 
     def _generate_right_border_conditions(self, grid):
-        return border_conditions.border_condition_2d(grid, self.problem._type,  "applied_force","applied_force",
-                                        self.problem._method,  force_left=20)
+        return border_conditions.border_condition_2d(grid, self.problem._type, self.problem._left_boundary_conditions, self.problem._right_boundary_conditions,
+                                        self.problem._method)
 
