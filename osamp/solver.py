@@ -78,29 +78,32 @@ class Solver:
         # for t in range(1, grid.shape[0]):
         ##get only pressure values : array[:, 0]
         time = np.arange(0, self.end_time, self.time_step)
+        source_of_grid.update_source_in_grid(grid_prev_t, self._dimension)
         result_grid = np.zeros((len(time), grid.shape[0], grid.shape[1]))
 
         for i in range(self.problem.grid._t_size - 1):
-            grid_prev_t = grid_next_t
-
             grid_prev_t = self._generate_border_conditions(grid_prev_t,  i)
             ##for seismic
             # grid_prev_t =  border_conditions.border_condition_1d(grid_prev_t, self.problem._type, "applied_force","absorb",
             #                                 self.problem._method, force_left=100)
-            source_of_grid.update_source_in_grid(grid_prev_t, self._dimension)
-            source_of_grid.update_source_in_grid(grid_next_t, self._dimension)
-            # source_of_grid.update_source_in_grid(grid_next_t) ##TODO
 
+            # source_of_grid.update_source_in_grid(grid_next_t) ##TODO
+            for k in range(1, grid_prev_t.shape[0] - 1):
+                for j in self.tension.values():
+                    grid_next_t[k - 1][i][j] = grid_prev_t[k][i][j]
             for k in range(len(grid_prev_t)):  # recieve Riman's invariant
                 grid_prev_t[k][i] = np.dot(omega_matrix, grid_prev_t[k][i])
             # TODO add new method
             if (self.problem._method == 'kir'):
-                print(self.spatial_step)
                 for index in self.tension.values():
                     grid_next_t[:, i + 1, index] = kir.kir(grid_prev_t[:, i, index], self.spatial_step,
                                                      matrix_of_eigns[index][index], self.time_step)
             elif (self.problem._method == 'beam_warming'):
                  grid_next_t = beam_warming.beam_warming(self.time_step, self.spatial_step, grid_prev_t, matrix_of_eigns, i)
+
+            for k in range(len(grid_next_t)):  # recieve Riman's invariant
+                grid_next_t[k][i + 1] = np.dot(inv_matrix, grid_next_t[k][i + 1])
+            grid_prev_t = grid_next_t
 
             # elif (self.problem._method == 'weno'):
             #     for index in self.tension.values():
@@ -123,14 +126,9 @@ class Solver:
 
 
         list_x = [i * self.spatial_step for i in range (len(grid_next_t))]
-        list_y = [grid_next_t[k][0][0] for k in range(len(grid_next_t))]
-        list_y1 = [grid_next_t[k][40][0] for k in range(len(grid_next_t))]
-        #plt.plot(list_x,list_y)
+        list_y1 = [grid_next_t[k][150][0] for k in range(len(grid_next_t))]
         print(grid_next_t[10][10][0])
         plt.plot(list_x, list_y1)
-        #plt.plot(list_x, list_y2)
-        #plt.plot(list_x, list_y3)
-        #plt.plot(list_x, list_y4)
 
 
         plt.show()

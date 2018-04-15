@@ -15,7 +15,7 @@ class Source:
     """This class is responsible for creating external sources of waves"""
     def __init__(self, type):
         self._type = type
-        self.coordinates_x = 10
+        self.coordinates_x = 9
         self.coordinates_y = 0
         self._source = self._get_source_by_type(type)
 
@@ -28,7 +28,7 @@ class Source:
         if dimension == 2  and len(grid[0][0][0]) == 3:
             grid[self.coordinates_x][self.coordinates_y][0] = np.array([100, 20, 0])
         elif dimension == 1:
-            grid[self.coordinates_x][0] = np.array([10, 0])
+            grid[self.coordinates_x][0] = np.array([100, 20])
         else:
             grid[self.coordinates_x][self.coordinates_y][0] = np.array([10, 0, 0, 0, 0])
         return grid
