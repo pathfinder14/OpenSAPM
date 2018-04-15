@@ -8,21 +8,24 @@ class Model:
     Model contain matrix of the acoustic/seismic equations
     
     """
-    def __init__(self, config, grid_size=15):
+    def __init__(self, config):
         self.arg = config
+        self._n = [0 for i in range(2)]
         self._type_problem = config['type']
         self._dim = config['dimension']
         self._image_path = config['image_path']
+        self._n[0] = config['n_x']
+        self._n[1] = config['n_y']
         self._elasticity_quotient = config['elasticity_quotient']
         self.env_prop = env.EnvironmentProperties(
             config['density'], config['elasticity_quotient'], config['mu_lame'],
             config['v_p'], config['v_p'])
         self._lamda_matrix = \
-            matrix.get_matrix(self._dim, self._type_problem, self.env_prop, grid_size, grid_size)
+            matrix.get_matrix(self._dim, self._type_problem, self.env_prop)
         self._omega_matrix = \
-            matrix.get_eign_matrix(self._dim, self._type_problem, self.env_prop, grid_size, grid_size)
+            matrix.get_eign_matrix(self._dim, self._type_problem, self.env_prop, self._n)
         self._inverse_omega_matrix = \
-            matrix.get_inv_eign_matrix(self._dim, self._type_problem, self.env_prop, grid_size, grid_size)
+            matrix.get_inv_eign_matrix(self._dim, self._type_problem, self.env_prop, self._n)
 
     @property
     def lambda_matrix(self):
@@ -43,6 +46,10 @@ class Model:
     @property
     def dim(self):
         return self._dim
+
+    @property
+    def n(self):
+        return self._n
 
     def __str__(self):
         result_srt = ''
