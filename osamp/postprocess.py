@@ -35,7 +35,8 @@ def draw1DSlice(solution, t_slice, x_start, x_end, legend, solution_max_value):
     plt.grid(True)
     
     plt.plot(x, solution, "--",linewidth=5)
-    plt.savefig('img' + os.sep + str(t_slice)+ 's.png' ) # - если рисовать мувик, будет сохранять .png
+    plt.savefig('img' + os.sep + str(t_slice) + 's.png' ) # - если рисовать мувик, будет сохранять .png
+    plt.clf()
     #plt.show() - если нужно отображать, не будет сохранять
 
 
@@ -52,12 +53,12 @@ def draw1DMovie(solution, t_filming_step, x_start, x_end, legend, t_grid_step):
         os.remove(f)
 
     #Вызываем рисовалку срезов по времени в цикле.
-    for i in range(0, solution.shape[0], t_filming_step):
-        draw1DSlice(solution[i], i * t_grid_step, x_start, x_end, legend, np.max(solution))
+    for i in range(0, solution.shape[1], t_filming_step):
+        draw1DSlice(solution[:,i, :], i * t_grid_step, x_start, x_end, legend, np.max(solution[:,i, :]))
 
     #Рисуем гифку из содержимого папки img\, сохраняем ее туда же.      
     images = []
-    filenames = sorted(fn for fn in os.listdir(path='img' + os.sep) if fn.endswith('.png'))
+    filenames = [str(i * t_grid_step) + 's.png' for i in range(solution.shape[1])]
     for filename in filenames:
         images.append(imageio.imread('img' + os.sep + filename))
     imageio.mimsave('img' + os.sep + 'movie.gif', images, duration = 0.1)

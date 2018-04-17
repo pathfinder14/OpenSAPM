@@ -58,6 +58,8 @@ class Problem(object):
         self._y_end = float(params['y_end'])
         self._left_boundary_conditions = params['left_boundary_conditions']
         self._right_boundary_conditions = params['right_boundary_conditions']
+        self._force_left = params['force_left']
+        self._force_right = params['force_right']
         self.source = self._produce_source_of_waves()
         if (self.type == 'acoustic') & (self.dimension == 2):
             self.tension = {

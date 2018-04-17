@@ -3,7 +3,6 @@ import numpy as np
 import importlib.util
 import border_conditions
 import postprocess
-import matplotlib.pyplot as plt
 
 # TODO chsnge type of imort module
 spec = importlib.util.spec_from_file_location("kir", "../utils/convection_diffusion_equation_solution/kir.py")
@@ -26,6 +25,12 @@ spec.loader.exec_module(bicompact)
 spec = importlib.util.spec_from_file_location("tvd", "../utils/TVD_method/TVDMethod.py")
 tvd = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(tvd)
+
+
+spec = importlib.util.spec_from_file_location("McCormack", "../utils/convection_diffusion_equation_solution/McCormack.py")
+McCormack = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(McCormack)
+
 
 p = 0  # index of pressure in values array
 v = 1  # index of velocity in values array
@@ -88,7 +93,7 @@ class Solver:
             #                                 self.problem._method, force_left=100)
 
             # source_of_grid.update_source_in_grid(grid_next_t) ##TODO
-            for k in range(1, grid_prev_t.shape[0] - 1):
+            for k in range(1, grid_next_t.shape[0]):
                 for j in self.tension.values():
                     grid_next_t[k - 1][i][j] = grid_prev_t[k][i][j]
             for k in range(len(grid_prev_t)):  # recieve Riman's invariant
@@ -99,41 +104,31 @@ class Solver:
                     grid_next_t[:, i + 1, index] = kir.kir(grid_prev_t[:, i, index], self.spatial_step,
                                                      matrix_of_eigns[index][index], self.time_step)
             elif (self.problem._method == 'beam_warming'):
-                 grid_next_t = beam_warming.beam_warming(self.time_step, self.spatial_step, grid_prev_t, matrix_of_eigns, i)
+                for index in self.tension.values():
+                    grid_next_t[:, i + 1, index] = beam_warming.beam_warming(self.time_step, self.spatial_step, grid_prev_t[:, i, index], matrix_of_eigns[index][index])
 
-            for k in range(len(grid_next_t)):  # recieve Riman's invariant
+            elif (self.problem._method == 'bicompact'):
+                for index in self.tension.values():
+                    grid_next_t[:, i + 1, index] = bicompact.bicompact_method(matrix_of_eigns[index][index], self.time_step,
+                                                                       self.spatial_step, grid_prev_t[:, i, index])
+
+            elif (self.problem._method == 'McCormack'):
+                for index in self.tension.values():
+                    grid_next_t[:, i + 1, index] = McCormack.McCormack(grid_prev_t[:, i, index], self.spatial_step,
+                                                     matrix_of_eigns[index][index], self.time_step)
+            elif (self.problem._method == 'weno'):
+                for index in self.tension.values():
+                    grid_next_t[:, i + 1, index] = weno.WENOmethod(matrix_of_eigns[index][index], self.time_step,
+                                                            self.spatial_step, grid_prev_t[:, i, index])
+
+            for k in range(grid_next_t.shape[0]):  # recieve Riman's invariant
                 grid_next_t[k][i + 1] = np.dot(inv_matrix, grid_next_t[k][i + 1])
             grid_prev_t = grid_next_t
 
-            # elif (self.problem._method == 'weno'):
-            #     for index in self.tension.values():
-            #         grid_next_t[:, index] = weno.WENOmethod(matrix_of_eigns[index][index], self.time_step,
-            #                                                 self.spatial_step, grid_prev_t[:, index])
-            #
-            # elif (self.problem._method == 'bicompact'):
-            #     for index in self.tension.values():
-            #         grid_next_t[:, index] = bicompact.bicompact_method(matrix_of_eigns[index][index], self.time_step,
-            #                                                            self.spatial_step, grid_prev_t[:, index])
-            #
-            # else:
-            #     raise Exception('Unknown method name: ' + self.problem._method)
-            # for k in range(len(grid_next_t)):  # recieve Riman's invariant
-            #     grid_next_t[k] = np.dot(inv_matrix, grid_next_t[k])
             #
             # if (i < result_grid.shape[0] - 1):
             #     result_grid[i + 1] = grid_next_t
 
-
-
-        list_x = [i * self.spatial_step for i in range (len(grid_next_t))]
-        list_y1 = [grid_next_t[k][150][0] for k in range(len(grid_next_t))]
-        print(grid_next_t[10][10][0])
-        plt.plot(list_x, list_y1)
-
-
-        plt.show()
-        return
-        print('Result grid shape: ' + str(result_grid.shape))
         postprocess.do_postprocess(grid_next_t, self.buffering_step,
                                     self.x_start, self.x_end, self.type,
                                     self.time_step)
@@ -226,7 +221,7 @@ class Solver:
                 grid, self.problem._type,
                 self.problem._left_boundary_conditions,
                 self.problem._right_boundary_conditions,
-                self.problem._method, time)
+                self.problem._method, time, self.problem._force_left, self.problem._force_right)
         elif self._dimension == 2:
             return border_conditions.border_condition_2d(
                 grid, self.problem._type,
