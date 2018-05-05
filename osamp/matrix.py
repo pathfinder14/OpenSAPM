@@ -108,6 +108,25 @@ def get_inv_eign_matrix(dim, type, environment_properties, n):
             # TODO: implement method get_seismic2d_inv_eign_matrix and replace the following with it
             return get_seismic2d_inv_eign_matrix(environment_properties.lambda_lame, environment_properties.mu_lame, environment_properties.density, n)
 
+# only if dimension > 1
+def get_omega_a_matrix(type, environment_properties):
+    # TODO create acoustic case
+    if type == 'acoustic':
+        return  np.transpose(np.array([[0, 0, 1], [-np.sqrt(environment_properties.density * environment_properties.elasticity_quotient), 1, 0], [np.sqrt(environment_properties.density * environment_properties.elasticity_quotient), 1, 0]]))
 
+
+def get_lambda_ab_matrix(type, environment_properties):
+    # TODO create seistic case
+    if type == 'acoustic':
+        return np.diag(np.array([0, -np.sqrt(environment_properties.elasticity_quotient / environment_properties.density ), np.sqrt(environment_properties.elasticity_quotient / environment_properties.density )]))
+
+def get_omega_b_matrix(type, environment_properties):
+    # TODO create seistic case
+    if type == 'acoustic':
+        return np.transpose(np.array(
+            [[0, 1, 0], [-np.sqrt(environment_properties.density * environment_properties.elasticity_quotient), 0, 1], [np.sqrt(environment_properties.density * environment_properties.elasticity_quotient), 0, 1]]))
+
+def inverse_matrix(matrix):
+    return np.linalg.inv(matrix)
 def calculate_params_for_acoustic():
     pass

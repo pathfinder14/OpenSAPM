@@ -3,6 +3,8 @@ import numpy as np
 import importlib.util
 import border_conditions
 import postprocess
+import matplotlib.pyplot as plt
+from mpl_toolkits import mplot3d
 
 # TODO chsnge type of imort module
 spec = importlib.util.spec_from_file_location("kir", "../utils/convection_diffusion_equation_solution/kir.py")
@@ -127,8 +129,8 @@ class Solver:
 
             #
             # if (i < result_grid.shape[0] - 1):
-            #     result_grid[i + 1] = grid_next_t
-
+            #
+            #result_grid[i + 1] = grid_next_t
         postprocess.do_postprocess(grid_next_t, self.buffering_step,
                                     self.x_start, self.x_end, self.type,
                                     self.time_step)
@@ -142,80 +144,88 @@ class Solver:
     def solve_2D_seismic(self):
         pass
 
-    def solve_splitted_2D(self, type_of_task, real_grid):
+
+    def solver(self, i, k, grid):
+        grid_next_t = np.zeros(grid.shape)
+        for j in range(grid.shape[k]):
+            if k == 1:
+                grid_prev = grid[:, j, :, :]
+                matrix = self.problem.model.omega_a_matrix
+                matrix_inverse = self.problem.model.inverse_omega_a_matrix
+                self.spatial_step = self.problem._x_step
+            else:
+                grid_prev = grid[j, :, :, :]
+                matrix = self.problem.model.omega_b_matrix
+                matrix_inverse = self.problem.model.inverse_omega_b_matrix
+                self.spatial_step = self.problem._y_step
+            grid_next = np.zeros(grid_prev.shape)
+            grid_prev = self._generate_border_conditions(grid_prev, i)
+            lambda_matrix = self.problem.model._lamda_matrix
+            for z in range(grid_prev.shape[0]):  # recieve Riman's invariant
+                grid_prev[z][i] = np.dot(matrix, grid_prev[z][i])
+            if (self.problem._method == 'kir'):
+                for index in self.tension.values():
+                    grid_next[:, i + 1, index] = kir.kir(grid_prev[:, i, index], self.spatial_step,
+                                                         lambda_matrix[index][index], self.time_step)
+            elif (self.problem._method == 'bicompact'):
+                for index in self.tension.values():
+                    grid_next[:, i + 1, index] = bicompact.bicompact_method(lambda_matrix[index][index],
+                                                                                  self.time_step,
+                                                                                  self.spatial_step,
+                                                                                  grid_prev[:, i, index])
+            for z in range(grid_next.shape[0]):  # recieve Riman's invariant
+                grid_next[z][i + 1] = np.dot(matrix_inverse, grid_next[z][i + 1])
+            if(k == 1):
+                grid_next_t[:, j, i, :] = grid_next[:, i + 1, :]
+            else:
+                grid_next_t[j, :, i, :] = grid_next[:, i + 1, :]
+        return grid_next_t
+
+    def solve_splitted_2D(self):
         """
         Method for splitted 2d problem to two 1d equation on one time slice
         """
-        grid_next = np.zeros_like(real_grid[0])
-        grid_prev = np.zeros_like(real_grid[0])
-        j = 0
-        for i in range(2 * real_grid.shape[0]):
-            # grid[3][3] = np.array([1, 20, 20])
-
-            self.source.update_source_in_grid(real_grid[10])
-            if (i % 2 == 0):
-                grid_prev = real_grid[j, :]
-                grid_prev = self._generate_border_conditions(grid_prev)
-            else:
-                grid_prev = real_grid[:, j]
-                grid_prev = self._generate_right_border_conditions(grid_prev)
-
-            # self.source.update_source_in_grid(grid_prev)
-            for k in range(grid_prev.shape[0]):  # recieve Riman's invariant
-                grid_prev[k] = np.dot(self.omega_matrix, grid_prev[k])
-            if (self.problem._method == 'kir'):
-                for index in self.tension.values():
-                    grid_next[:, index] = kir.kir(grid_prev.shape[0], grid_prev[:, index],
-                                                  self.matrix_of_eigns[index][index], self.time_step, self.spatial_step)
-            # elif (self.problem._method == 'bicompact'):
-            #     for index in self.tension.values():
-            #         grid_next[:, index] = bicompact.bicompact_method(self.matrix_of_eigns[index][index], self.time_step,
-            #                                                          self.spatial_step, grid_prev[:, index])
-            # elif (self.problem._method == 'beam_warming'):
-            #     grid_next = beam_warming.beam_warming(self.matrix_of_eigns, self.time_step, self.spatial_step,
-            #                                           grid_prev)
-            # elif (self.problem._method == 'tvd'):
-            #     grid_next = tvd.TVDMethod(self.matrix_of_eigns, self.time_step, self.spatial_step, grid_prev, 'MC')
-            # else:
-            #     raise Exception('Unknown method name: ' + self.problem._method)
-            # for k in range(grid_next.shape[0]):  # recieve Riman's invariant
-            #     grid_next[k] = np.dot(self.inv_matrix, grid_next[k])
-            # if (i % 2 == 0):
-            #     real_grid[j, :] = grid_next
-            # else:
-            #     real_grid[:, j] = grid_next
-            #     j += 1
-            #
-            # # print("Grid {0} on iter{1}\n".format(grid, j))
-            #
-        return real_grid
+        grid = self._grid
+        self._dimension = 1
+        for i in range((grid.shape[2] - 1)):
+            grid_next_t = self.solver(i, 0, grid)
+            # grid[:, :, i + 1, :] = self.solver(i, 0, grid_next_t)[:, :, i, :]
+            grid[:, :, i + 1, :] = grid_next_t[:,:,i,:]
+        return grid
 
     def solve_2D(self):
         grid = self._grid
-        source_of_grid = self.source
-        # self.time_step = 0.01
-        # self.spatial_step = 0.1
+        # source_of_grid = self.source
+        # # self.time_step = 0.01
+        # # self.spatial_step = 0.1
+        #
+        # # for t in range(1, grid.shape[0]):
+        # ##get only pressure values : array[:, 0]
+        self.source.update_source_in_grid(grid, self._dimension)
+        # for i in range(grid.shape[1] - 1):
+        #     grid[:,i + 1, :] = self.solve_splitted_2D(self.type, grid[:, i, :])
 
-        # for t in range(1, grid.shape[0]):
-        ##get only pressure values : array[:, 0]
-        time = np.arange(0, self.end_time, self.time_step)
-        result_grid = np.zeros((len(time), grid.shape[0], grid.shape[1], grid.shape[2]))
-        # do iter
-        for i in range(len(time)):
-            grid_n = self.solve_splitted_2D(self.type, grid)
-            if (i < result_grid.shape[0] - 1):
-                result_grid[i] = grid_n
+        grid = self.solve_splitted_2D()
+        print(grid[:, :, 1, 0])
+        print('Result grid shape: ' + str(grid.shape))
+        list_x = [i * self.problem._y_step for i in range(grid.shape[1])]
+        plt.plot(list_x, grid[5, :, 5, 2])
+        # fig = plt.figure()
+        # ax = fig.add_subplot(111, projection='3d')
+        # print(grid.shape)
+        # list_x = [i * self.problem._x_step for i in range(grid.shape[0])]
+        # list_y = [i * self.problem._y_step for i in range(grid.shape[1])]
+        # xgrid, ygrid = np.meshgrid(list_x, list_y)
+        # ax.plot_wireframe(xgrid, ygrid, grid[:, :,1 ,0])
+       #   az.plot_wireframe(list_x, list_y, grid[:, :, 100, 0])
+        # postprocess.do_2_postprocess(grid[:, :, :, 2], self.buffering_step,
+        #                              self.x_start, self.x_end, self.y_start, self.problem.type,
+        #                              np.min(np.min(np.min(grid[:, :, :, 2]))),
+        #                              np.max(np.max(np.max(grid[:, :, :, 2]))),
+        #                              self.time_step)
+        plt.show()
 
-        print('Result grid shape: ' + str(result_grid.shape))
-
-        postprocess.do_2_postprocess(result_grid[:, :, :, 2], self.buffering_step,
-                                     self.x_start, self.x_end, self.y_start, self.problem.type,
-                                     np.min(np.min(np.min(result_grid[:, :, :, 2]))),
-                                     np.max(np.max(np.max(result_grid[:, :, :, 2]))),
-                                     self.time_step)
-        # Create time array
-
-    def _generate_border_conditions(self, grid, time):
+    def _generate_border_conditions(self, grid, time = 0):
         if self._dimension == 1:
             return border_conditions.border_condition_1d(
                 grid, self.problem._type,
@@ -223,7 +233,7 @@ class Solver:
                 self.problem._right_boundary_conditions,
                 self.problem._method, time, self.problem._force_left, self.problem._force_right)
         elif self._dimension == 2:
-            return border_conditions.border_condition_2d(
+            return border_conditions.border_condition_1d(
                 grid, self.problem._type,
                 self.problem._left_boundary_conditions,
                 self.problem._right_boundary_conditions,
@@ -232,4 +242,4 @@ class Solver:
     def _generate_right_border_conditions(self, grid, time):
         return border_conditions.border_condition_2d(grid, self.problem._type, self.problem._left_boundary_conditions,
                                                      self.problem._right_boundary_conditions,
-                                                     self.problem._method, time)
+                                                     self.problem._method, time = 0)

@@ -86,6 +86,8 @@ def border_condition_1d_acoustic(grid, type_of_task, border_left, border_right, 
         for i in range(cells_left - 1, -1, -1):
             grid_new[i][time][p] = grid[cells_left - 1 - i][time][p]
             grid_new[i][time][v] = -grid[cells_left - 1 - i][time][v]
+            if(grid_new.shape[2] == 3):
+                grid_new[i][time][u] = -grid[cells_left - 1 - i][time][u]
 
     elif border_left == ConditionNames.CYCLE_CONDITION:
         for i in range(cells_left - 1, -1, -1):
@@ -99,6 +101,8 @@ def border_condition_1d_acoustic(grid, type_of_task, border_left, border_right, 
         for i in range(cells_left - 1, -1, -1):
             grid_new[i][time][v] = grid[cells_left - 1 - i][time][v]
             grid_new[i][time][p] = 2 * force_left - grid[cells_left - 1 - i][time][p]
+            if (grid_new.shape[2] == 3):
+                grid_new[i][time][u] = grid[cells_left - 1 - i][time][u]
 
     ext_grid = np.concatenate((grid_new, grid), axis=0)
 
@@ -109,6 +113,8 @@ def border_condition_1d_acoustic(grid, type_of_task, border_left, border_right, 
         for i in range(cells_right - 1, -1, -1):
                 grid_new[i][time][p] = grid[len(grid) - 1 - i][time][p]
                 grid_new[i][time][v] = -grid[len(grid) - 1 - i][time][v]
+                if (grid_new.shape[2] == 3):
+                    grid_new[i][time][u] = -grid[len(grid) - 1 - i][time][u]
 
     elif border_right == ConditionNames.CYCLE_CONDITION:
         for i in range(cells_right - 1, -1, -1):
@@ -122,6 +128,8 @@ def border_condition_1d_acoustic(grid, type_of_task, border_left, border_right, 
         for i in range(cells_right - 1, -1, -1):
             grid_new[i][time][v] = grid[len(grid) - 1 - i][time][v]
             grid_new[i][time][p] = 2 * force_right - grid[len(grid) - 1 - i][time][p]
+            if (grid_new.shape[2] == 3):
+                grid_new[i][time][u] = grid[len(grid) - 1 - i][time][u]
 
     ext_grid = np.concatenate((ext_grid, grid_new), axis=0)
     return ext_grid
@@ -138,63 +146,63 @@ def border_condition_2d_acoustic(grid, border_left, border_right, method_name, t
     cells_left = SolverMethods.get_cells_amount_left(method_name)
     cells_right = SolverMethods.get_cells_amount_right(method_name)
 
-    grid_new = np.zeros((cells_left, 3))
+    grid_new = np.zeros((cells_left, grid.shape[0], grid.shape[1], grid.shape[2]))
 
     # Check left border.
 
     if border_left == ConditionNames.REFLECTION_CONDITION:
         for i in range(cells_left - 1, -1, -1):
             if direction == Directions.X:
-                grid_new[i][v] = -grid[cells_left - 1 - i][v]
-                grid_new[i][u] = grid[cells_left - 1 - i][u]
+                grid_new[i][time][v] = -grid[cells_left - 1 - i][time][v]
+                grid_new[i][time][u] = grid[cells_left - 1 - i][time][u]
             else:
-                grid_new[i][v] = grid[cells_left - 1 - i][v]
-                grid_new[i][u] = -grid[cells_left - 1 - i][u]
-            grid_new[i][p] = grid[cells_left - 1 - i][p]
+                grid_new[i][time][v] = grid[cells_left - 1 - i][time][v]
+                grid_new[i][time][u] = -grid[cells_left - 1 - i][time][u]
+            grid_new[i][time][p] = grid[cells_left - 1 - i][time][p]
 
 
     elif border_left == ConditionNames.CYCLE_CONDITION:
         for i in range(cells_left - 1, -1, -1):
-            grid_new[i] = grid[len(grid) - cells_left + i]
+            grid_new[i][time] = grid[len(grid) - cells_left + i][time]
     #
     elif border_left == ConditionNames.ABSORBING_CONDITION:
         for i in range(cells_left - 1, -1, -1):
-            grid_new[i] = grid[cells_left - 1 - i]
+            grid_new[i][time] = grid[cells_left - 1 - i][time]
 
     elif border_left == ConditionNames.APPLIED_FORCE_CONDITION:
         for i in range(cells_left - 1, -1, -1):
-            grid_new[i][v] = grid[cells_left - 1 - i][v]
-            grid_new[i][u] = grid[cells_left - 1 - i][u]
-            grid_new[i][p] = 2 * force_left - grid[cells_left - 1 - i][p]
+            grid_new[i][time][v] = grid[cells_left - 1 - i][time][v]
+            grid_new[i][time][u] = grid[cells_left - 1 - i][time][u]
+            grid_new[i][time][p] = 2 * force_left - grid[cells_left - 1 - i][time][p]
 
     ext_grid = np.concatenate((grid_new, grid), axis=0)
 
-    grid_new = np.zeros((cells_right, 3))
+    grid_new = np.zeros((cells_right, grid.shape[0], grid.shape[1], grid.shape[2]))
 
     # Check right border.
     if border_right == ConditionNames.REFLECTION_CONDITION:
         for i in range(cells_right - 1, -1, -1):
             if direction == Directions.X:
-                grid_new[i][v] = -grid[len(grid) - 1 - i][v]
-                grid_new[i][u] = grid[len(grid) - 1 - i][u]
+                grid_new[i][time][v] = -grid[len(grid) - 1 - i][time][v]
+                grid_new[i][time][u] = grid[len(grid) - 1 - i][time][u]
             else:
-                grid_new[i][v] = grid[len(grid) - 1 - i][v]
-                grid_new[i][u] = -grid[len(grid) - 1 - i][u]
-            grid_new[i][p] = grid[len(grid) - 1 - i][p]
+                grid_new[i][time][v] = grid[len(grid) - 1 - i][time][v]
+                grid_new[i][time][u] = -grid[len(grid) - 1 - i][time][u]
+            grid_new[i][time][p] = grid[len(grid) - 1 - i][time][p]
 
     elif border_right == ConditionNames.CYCLE_CONDITION:
         for i in range(cells_right - 1, -1, -1):
-            grid_new[i] = grid[i]
+            grid_new[i][time] = grid[i][time]
 
     elif border_right == ConditionNames.ABSORBING_CONDITION:
         for i in range(cells_right - 1, -1, -1):
-            grid_new[i] = grid[len(grid) - 1 - i]
+            grid_new[i][time] = grid[len(grid) - 1 - i][time]
 
     elif border_right == ConditionNames.APPLIED_FORCE_CONDITION:
         for i in range(cells_left - 1, -1, -1):
-            grid_new[i][v] = grid[len(grid) - 1 - i][v]
-            grid_new[i][u] = grid[len(grid) - 1 - i][u]
-            grid_new[i][p] = 2 * force_right - grid[len(grid) - 1 - i][p]
+            grid_new[i][time][v] = grid[len(grid) - 1 - i][time][v]
+            grid_new[i][time][u] = grid[len(grid) - 1 - i][time][u]
+            grid_new[i][time][p] = 2 * force_right - grid[len(grid) - 1 - i][time][p]
 
     ext_grid = np.concatenate((ext_grid, grid_new), axis=0)
     return ext_grid
@@ -214,7 +222,7 @@ def border_condition_2d_seismic(grid, border_left, border_right, method_name, ti
     cells_left = SolverMethods.get_cells_amount_left(method_name)
     cells_right = SolverMethods.get_cells_amount_right(method_name)
 
-    grid_new = np.zeros((cells_left, 5))
+    grid_new = np.zeros((cells_left, grid.shape[0], grid.shape[1]))
 
     if direction == Directions.X:
         s_main = s11
@@ -233,56 +241,56 @@ def border_condition_2d_seismic(grid, border_left, border_right, method_name, ti
     # Check left border.
     if border_left == ConditionNames.REFLECTION_CONDITION:
         for i in range(cells_left - 1, -1, -1):
-            grid_new[i][s11] = grid[cells_left - 1 - i][s11]
-            grid_new[i][s22] = grid[cells_left - 1 - i][s22]
-            grid_new[i][s12] = grid[cells_left - 1 - i][s12]
-            grid_new[i][v_main] = -grid[cells_left - 1 - i][v_main]
-            grid_new[i][v_extra] = grid[cells_left - 1 - i][v_extra]
+            grid_new[i][time][s11] = grid[cells_left - 1 - i][time][s11]
+            grid_new[i][time][s22] = grid[cells_left - 1 - i][time][s22]
+            grid_new[i][time][s12] = grid[cells_left - 1 - i][time][s12]
+            grid_new[i][time][v_main] = -grid[cells_left - 1 - i][time][v_main]
+            grid_new[i][time][v_extra] = grid[cells_left - 1 - i][time][v_extra]
 
     elif border_left == ConditionNames.CYCLE_CONDITION:
         for i in range(cells_left - 1, -1, -1):
-            grid_new[i] = grid[len(grid) - cells_left + i]
+            grid_new[i][time] = grid[len(grid) - cells_left + i][time]
     #
     elif border_left == ConditionNames.ABSORBING_CONDITION:
         for i in range(cells_left - 1, -1, -1):
-            grid_new[i] = grid[cells_left - 1 - i]
+            grid_new[i][time] = grid[cells_left - 1 - i][time]
 
     elif border_left == ConditionNames.APPLIED_FORCE_CONDITION:
         for i in range(cells_left - 1, -1, -1):
-            grid_new[i][s_main] = 2 * force_left - grid[cells_left - 1 - i][s_main]
-            grid_new[i][s12] = 2 * force_left - grid[cells_left - 1 - i][s12]
-            grid_new[i][s_extra] = grid[cells_left - 1 - i][s_extra]
-            grid_new[i][vx] = grid[cells_left - 1 - i][vx]
-            grid_new[i][vy] = grid[cells_left - 1 - i][vy]
+            grid_new[i][time][s_main] = 2 * force_left - grid[cells_left - 1 - i][time][s_main]
+            grid_new[i][time][s12] = 2 * force_left - grid[cells_left - 1 - i][time][s12]
+            grid_new[i][time][s_extra] = grid[cells_left - 1 - i][time][s_extra]
+            grid_new[i][time][vx] = grid[cells_left - 1 - i][time][vx]
+            grid_new[i][time][vy] = grid[cells_left - 1 - i][time][vy]
 
     ext_grid = np.concatenate((grid_new, grid), axis=0)
 
-    grid_new = np.zeros((cells_right, 5))
+    grid_new = np.zeros((cells_right, grid.shape[0], grid.shape[1]))
 
     # Check right border.
     if border_right == ConditionNames.REFLECTION_CONDITION:
         for i in range(cells_right - 1, -1, -1):
-            grid_new[i][s11] = grid[len(grid) - 1 - i][s11]
-            grid_new[i][s22] = grid[len(grid) - 1 - i][s22]
-            grid_new[i][s12] = grid[len(grid) - 1 - i][s12]
-            grid_new[i][v_main] = -grid[len(grid) - 1 - i][v_main]
-            grid_new[i][v_extra] = grid[len(grid) - 1 - i][v_extra]
+            grid_new[i][time][s11] = grid[len(grid) - 1 - i][time][s11]
+            grid_new[i][time][s22] = grid[len(grid) - 1 - i][time][s22]
+            grid_new[i][time][s12] = grid[len(grid) - 1 - i][time][s12]
+            grid_new[i][time][v_main] = -grid[len(grid) - 1 - i][time][v_main]
+            grid_new[i][time][v_extra] = grid[len(grid) - 1 - i][time][v_extra]
 
     elif border_right == ConditionNames.CYCLE_CONDITION:
         for i in range(cells_right - 1, -1, -1):
-            grid_new[i] = grid[i]
+            grid_new[i][time] = grid[i][time]
 
     elif border_right == ConditionNames.ABSORBING_CONDITION:
         for i in range(cells_right - 1, -1, -1):
-            grid_new[i] = grid[len(grid) - 1 - i]
+            grid_new[i][time] = grid[len(grid) - 1 - i][time]
 
     elif border_right == ConditionNames.APPLIED_FORCE_CONDITION:
         for i in range(cells_left - 1, -1, -1):
-            grid_new[i][s_main] = 2 * force_right - grid[len(grid) - 1 - i][s_main]
-            grid_new[i][s12] = 2 * force_right - grid[len(grid) - 1 - i][s12]
-            grid_new[i][s_extra] = grid[len(grid) - 1 - i][s_extra]
-            grid_new[i][vx] = grid[len(grid) - 1 - i][vx]
-            grid_new[i][vy] = grid[len(grid) - 1 - i][vy]
+            grid_new[i][time][s_main] = 2 * force_right - grid[len(grid) - 1 - i][time][s_main]
+            grid_new[i][time][s12] = 2 * force_right - grid[len(grid) - 1 - i][time][s12]
+            grid_new[i][time][s_extra] = grid[len(grid) - 1 - i][time][s_extra]
+            grid_new[i][time][vx] = grid[len(grid) - 1 - i][time][vx]
+            grid_new[i][time][vy] = grid[len(grid) - 1 - i][time][vy]
 
     ext_grid = np.concatenate((ext_grid, grid_new), axis=0)
     return ext_grid

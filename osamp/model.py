@@ -26,6 +26,15 @@ class Model:
             matrix.get_eign_matrix(self._dim, self._type_problem, self.env_prop, self._n)
         self._inverse_omega_matrix = \
             matrix.get_inv_eign_matrix(self._dim, self._type_problem, self.env_prop, self._n)
+        if(self.dim == 2):
+            self._omega_a_matrix = matrix.get_omega_a_matrix(self.type_problem, self.env_prop)
+            self._omega_b_matrix = matrix.get_omega_b_matrix(self.type_problem, self.env_prop)
+            self._lamda_matrix = matrix.get_lambda_ab_matrix(self.type_problem, self.env_prop)
+            self._inverse_omega_a_matrix = matrix.inverse_matrix(self._omega_a_matrix)
+            self._inverse_omega_b_matrix = matrix.inverse_matrix(self._omega_b_matrix)
+
+
+
 
     @property
     def lambda_matrix(self):
@@ -50,6 +59,22 @@ class Model:
     @property
     def n(self):
         return self._n
+
+    @property
+    def omega_a_matrix(self):
+        return self._omega_a_matrix
+
+    @property
+    def omega_b_matrix(self):
+        return self._omega_b_matrix
+
+    @property
+    def inverse_omega_a_matrix(self):
+        return self._inverse_omega_a_matrix
+
+    @property
+    def inverse_omega_b_matrix(self):
+        return self._inverse_omega_b_matrix
 
     def __str__(self):
         result_srt = ''
