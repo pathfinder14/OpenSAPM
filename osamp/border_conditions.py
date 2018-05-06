@@ -86,8 +86,6 @@ def border_condition_1d_acoustic(grid, type_of_task, border_left, border_right, 
         for i in range(cells_left - 1, -1, -1):
             grid_new[i][time][p] = grid[cells_left - 1 - i][time][p]
             grid_new[i][time][v] = -grid[cells_left - 1 - i][time][v]
-            if(grid_new.shape[2] == 3):
-                grid_new[i][time][u] = -grid[cells_left - 1 - i][time][u]
 
     elif border_left == ConditionNames.CYCLE_CONDITION:
         for i in range(cells_left - 1, -1, -1):
@@ -101,8 +99,7 @@ def border_condition_1d_acoustic(grid, type_of_task, border_left, border_right, 
         for i in range(cells_left - 1, -1, -1):
             grid_new[i][time][v] = grid[cells_left - 1 - i][time][v]
             grid_new[i][time][p] = 2 * force_left - grid[cells_left - 1 - i][time][p]
-            if (grid_new.shape[2] == 3):
-                grid_new[i][time][u] = grid[cells_left - 1 - i][time][u]
+
 
     ext_grid = np.concatenate((grid_new, grid), axis=0)
 
@@ -113,8 +110,6 @@ def border_condition_1d_acoustic(grid, type_of_task, border_left, border_right, 
         for i in range(cells_right - 1, -1, -1):
                 grid_new[i][time][p] = grid[len(grid) - 1 - i][time][p]
                 grid_new[i][time][v] = -grid[len(grid) - 1 - i][time][v]
-                if (grid_new.shape[2] == 3):
-                    grid_new[i][time][u] = -grid[len(grid) - 1 - i][time][u]
 
     elif border_right == ConditionNames.CYCLE_CONDITION:
         for i in range(cells_right - 1, -1, -1):
@@ -128,8 +123,6 @@ def border_condition_1d_acoustic(grid, type_of_task, border_left, border_right, 
         for i in range(cells_right - 1, -1, -1):
             grid_new[i][time][v] = grid[len(grid) - 1 - i][time][v]
             grid_new[i][time][p] = 2 * force_right - grid[len(grid) - 1 - i][time][p]
-            if (grid_new.shape[2] == 3):
-                grid_new[i][time][u] = grid[len(grid) - 1 - i][time][u]
 
     ext_grid = np.concatenate((ext_grid, grid_new), axis=0)
     return ext_grid
@@ -146,7 +139,7 @@ def border_condition_2d_acoustic(grid, border_left, border_right, method_name, t
     cells_left = SolverMethods.get_cells_amount_left(method_name)
     cells_right = SolverMethods.get_cells_amount_right(method_name)
 
-    grid_new = np.zeros((cells_left, grid.shape[0], grid.shape[1], grid.shape[2]))
+    grid_new = np.zeros((cells_left, grid.shape[1], grid.shape[2]))
 
     # Check left border.
 
@@ -177,7 +170,7 @@ def border_condition_2d_acoustic(grid, border_left, border_right, method_name, t
 
     ext_grid = np.concatenate((grid_new, grid), axis=0)
 
-    grid_new = np.zeros((cells_right, grid.shape[0], grid.shape[1], grid.shape[2]))
+    grid_new = np.zeros((cells_right, grid.shape[1], grid.shape[2]))
 
     # Check right border.
     if border_right == ConditionNames.REFLECTION_CONDITION:

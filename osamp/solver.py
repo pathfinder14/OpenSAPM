@@ -4,7 +4,9 @@ import importlib.util
 import border_conditions
 import postprocess
 import matplotlib.pyplot as plt
+import border_conditions as b
 from mpl_toolkits import mplot3d
+
 
 # TODO chsnge type of imort module
 spec = importlib.util.spec_from_file_location("kir", "../utils/convection_diffusion_equation_solution/kir.py")
@@ -51,9 +53,10 @@ class Solver:
         self.cfl = 0.1  # TODO change this parametrs to user's propertyies
         self._dimension = problem.dimension
         self.problem = problem
-        self.matrix_of_eigns = problem.model.lambda_matrix
-        self.omega_matrix = problem.model.omega_matrix
-        self.inv_matrix = problem.model.inverse_omega_matrix
+        if(self._dimension != 2):
+            self.matrix_of_eigns = problem.model.lambda_matrix
+            self.omega_matrix = problem.model.omega_matrix
+            self.inv_matrix = problem.model.inverse_omega_matrix
         self._grid = problem._grid.grid
         self.source = problem.source
         self.type = problem._type
@@ -65,6 +68,7 @@ class Solver:
         self.x_start = problem._x_start
         self.x_end = problem._x_end
         self.y_start = problem._y_start
+        self.y_end = problem._y_end
         self.spatial_step = problem._x_step
         # self.time_step = self.cfl*self.spatial_step/self.v_p
         if self._dimension == 1:
@@ -153,14 +157,17 @@ class Solver:
                 matrix = self.problem.model.omega_a_matrix
                 matrix_inverse = self.problem.model.inverse_omega_a_matrix
                 self.spatial_step = self.problem._x_step
+                directions = b.Directions.X
+                lambda_matrix = self.problem.model._lamda_a_matrix
             else:
                 grid_prev = grid[j, :, :, :]
                 matrix = self.problem.model.omega_b_matrix
                 matrix_inverse = self.problem.model.inverse_omega_b_matrix
                 self.spatial_step = self.problem._y_step
+                directions = b.Directions.Y
+                lambda_matrix = self.problem.model._lamda_b_matrix
             grid_next = np.zeros(grid_prev.shape)
-            grid_prev = self._generate_border_conditions(grid_prev, i)
-            lambda_matrix = self.problem.model._lamda_matrix
+            grid_prev = self._generate_border_conditions(grid_prev, i, directions)
             for z in range(grid_prev.shape[0]):  # recieve Riman's invariant
                 grid_prev[z][i] = np.dot(matrix, grid_prev[z][i])
             if (self.problem._method == 'kir'):
@@ -186,11 +193,10 @@ class Solver:
         Method for splitted 2d problem to two 1d equation on one time slice
         """
         grid = self._grid
-        self._dimension = 1
         for i in range((grid.shape[2] - 1)):
-            grid_next_t = self.solver(i, 0, grid)
-            # grid[:, :, i + 1, :] = self.solver(i, 0, grid_next_t)[:, :, i, :]
-            grid[:, :, i + 1, :] = grid_next_t[:,:,i,:]
+            grid_next_t_a = self.solver(i, 1, grid)
+            grid_next_t_b = self.solver(i, 0, grid)
+            grid[:,:, i + 1,:] = self.problem.n[0] * grid_next_t_a[:,:, i,:] + self.problem.n[1] * grid_next_t_b[:,:, i, :]
         return grid
 
     def solve_2D(self):
@@ -201,31 +207,32 @@ class Solver:
         #
         # # for t in range(1, grid.shape[0]):
         # ##get only pressure values : array[:, 0]
+        print(2)
         self.source.update_source_in_grid(grid, self._dimension)
         # for i in range(grid.shape[1] - 1):
         #     grid[:,i + 1, :] = self.solve_splitted_2D(self.type, grid[:, i, :])
 
         grid = self.solve_splitted_2D()
-        print(grid[:, :, 1, 0])
         print('Result grid shape: ' + str(grid.shape))
-        list_x = [i * self.problem._y_step for i in range(grid.shape[1])]
-        plt.plot(list_x, grid[5, :, 5, 2])
-        # fig = plt.figure()
-        # ax = fig.add_subplot(111, projection='3d')
-        # print(grid.shape)
-        # list_x = [i * self.problem._x_step for i in range(grid.shape[0])]
-        # list_y = [i * self.problem._y_step for i in range(grid.shape[1])]
-        # xgrid, ygrid = np.meshgrid(list_x, list_y)
-        # ax.plot_wireframe(xgrid, ygrid, grid[:, :,1 ,0])
-       #   az.plot_wireframe(list_x, list_y, grid[:, :, 100, 0])
-        # postprocess.do_2_postprocess(grid[:, :, :, 2], self.buffering_step,
-        #                              self.x_start, self.x_end, self.y_start, self.problem.type,
-        #                              np.min(np.min(np.min(grid[:, :, :, 2]))),
-        #                              np.max(np.max(np.max(grid[:, :, :, 2]))),
+        # list_x = [i * self.problem._y_step for i in range(grid.shape[1])]
+        # plt.plot(list_x, grid[5, :, 5, 2])
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        print(grid.shape)
+        list_x = [i * self.problem._x_step for i in range(grid.shape[0])]
+        list_y = [i * self.problem._y_step for i in range(grid.shape[1])]
+        xgrid, ygrid = np.meshgrid(list_x, list_y)
+
+        ax.plot_wireframe(xgrid, ygrid, grid[:, :,80,1])
+        # j = 0
+        # postprocess.do_2_postprocess(grid[:, :, :, j], self.buffering_step,
+        #                              self.x_start, self.x_end, self.y_start, self.y_end, self.problem.type,
+        #                              np.min(np.min(np.min(grid[:, :, :, j]))),
+        #                              np.max(np.max(np.max(grid[:, :, :, j]))),
         #                              self.time_step)
         plt.show()
 
-    def _generate_border_conditions(self, grid, time = 0):
+    def _generate_border_conditions(self, grid, time = 0, direction=b.Directions.X):
         if self._dimension == 1:
             return border_conditions.border_condition_1d(
                 grid, self.problem._type,
@@ -233,11 +240,11 @@ class Solver:
                 self.problem._right_boundary_conditions,
                 self.problem._method, time, self.problem._force_left, self.problem._force_right)
         elif self._dimension == 2:
-            return border_conditions.border_condition_1d(
+            return border_conditions.border_condition_2d(
                 grid, self.problem._type,
                 self.problem._left_boundary_conditions,
                 self.problem._right_boundary_conditions,
-                self.problem._method, time)
+                self.problem._method, time, direction)
 
     def _generate_right_border_conditions(self, grid, time):
         return border_conditions.border_condition_2d(grid, self.problem._type, self.problem._left_boundary_conditions,

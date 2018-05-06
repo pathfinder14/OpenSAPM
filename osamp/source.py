@@ -15,8 +15,8 @@ class Source:
     """This class is responsible for creating external sources of waves"""
     def __init__(self, type):
         self._type = type
-        self.coordinates_x = 5
-        self.coordinates_y = 5
+        self.coordinates_x = 10
+        self.coordinates_y = 10
         self._source = self._get_source_by_type(type)
 
     # TODO: make return valid value
@@ -26,7 +26,7 @@ class Source:
     def _create_spherical_source(self, grid, dimension):
         #TODO delete unnamed constants
         if dimension == 2  and len(grid[0][0][0]) == 3:
-            grid[self.coordinates_x][self.coordinates_y][0] = np.array([1000, 0, 0])
+            grid[self.coordinates_x][self.coordinates_y][0] = np.array([10, 0, 0])
         elif dimension == 1:
             grid[self.coordinates_x][0] = np.array([100, 20])
         else:

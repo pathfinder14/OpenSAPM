@@ -112,20 +112,24 @@ def get_inv_eign_matrix(dim, type, environment_properties, n):
 def get_omega_a_matrix(type, environment_properties):
     # TODO create acoustic case
     if type == 'acoustic':
-        return  np.transpose(np.array([[0, 0, 1], [-np.sqrt(environment_properties.density * environment_properties.elasticity_quotient), 1, 0], [np.sqrt(environment_properties.density * environment_properties.elasticity_quotient), 1, 0]]))
+        return  1 / 2 * np.transpose(np.array([[-1 / np.sqrt(environment_properties.density * environment_properties.elasticity_quotient), 0, 1 / np.sqrt(environment_properties.density * environment_properties.elasticity_quotient)],
+                                              [1, 0, 1],
+                                              [0, 2, 0]]))
 
 
 def get_lambda_ab_matrix(type, environment_properties):
     # TODO create seistic case
     if type == 'acoustic':
-        return np.diag(np.array([0, -np.sqrt(environment_properties.elasticity_quotient / environment_properties.density ), np.sqrt(environment_properties.elasticity_quotient / environment_properties.density )]))
+        return np.diag(np.array([-np.sqrt(environment_properties.elasticity_quotient / environment_properties.density ),0,  np.sqrt(environment_properties.elasticity_quotient / environment_properties.density )]))
 
 def get_omega_b_matrix(type, environment_properties):
     # TODO create seistic case
     if type == 'acoustic':
-        return np.transpose(np.array(
-            [[0, 1, 0], [-np.sqrt(environment_properties.density * environment_properties.elasticity_quotient), 0, 1], [np.sqrt(environment_properties.density * environment_properties.elasticity_quotient), 0, 1]]))
-
+        return 1 / 2 * np.transpose(np.array([[-1 / np.sqrt(
+            environment_properties.density * environment_properties.elasticity_quotient), 0, 1 / np.sqrt(
+            environment_properties.density * environment_properties.elasticity_quotient)],
+                                              [0, 2, 0],
+                                              [1, 0, 1]]))
 def inverse_matrix(matrix):
     return np.linalg.inv(matrix)
 def calculate_params_for_acoustic():

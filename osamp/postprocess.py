@@ -65,12 +65,11 @@ def draw1DMovie(solution, t_filming_step, x_start, x_end, legend, t_grid_step):
     
 
 
-def draw2DSlice(solution, t_slice, x_start, x_end, y_start, legend, solution_min_value, solution_max_value, 
+def draw2DSlice(solution, t_slice, x_start, x_end, y_start, y_end, legend, solution_min_value, solution_max_value,
                 time_marker_length):
     print('in draw 2d slice')
     npArray = np.array(solution)
     npArrayTransposed = npArray.transpose()
-    y_end = 0
     solution = npArrayTransposed
     
     M = len(solution)
@@ -78,7 +77,7 @@ def draw2DSlice(solution, t_slice, x_start, x_end, y_start, legend, solution_min
     x = np.arange(x_start,x_end,x_step)
     
     M = len(solution[0])
-    y_step = (0 - y_start) / M
+    y_step = (y_end - y_start) / M
     y =  np.arange(y_start,y_end,y_step)
     
     #Устанавливаем размеры рисунка.
@@ -128,27 +127,26 @@ def draw2DSlice(solution, t_slice, x_start, x_end, y_start, legend, solution_min
 
 
 
-def draw2DMovie(solution, t_filming_step, x_start, x_end, y_start, legend, solution_min_value, solution_max_value, t_grid_step):
+def draw2DMovie(solution, t_filming_step, x_start, x_end, y_start, y_end, legend, solution_min_value, solution_max_value, t_grid_step):
     #Переменная, контролирующая длину имен файла(Нужна для округления)
     time_marker_length = len(str(t_filming_step))
     
     #!!!Здесь указываем, вдоль какого x и вдоль какого y мы хотим получить срезы
     x_slice_value = 3
     y_slice_value = -1
-    y_end = 0
     #Ищем значения на сетке, которые наиболее близки к заданным значениям срезов:
     #1: Взяли один срез по времени
-    npArray = np.array(solution[0])
+    # npArray = np.array(solution[0])
     
     #2: Ищем индекс по иксу
-    M = len(npArray)
+    M = solution.shape[0]
     x_step = (x_end - x_start) / M
     x =  np.arange(x_start,x_end,x_step)
     x_slice_index = int((x_slice_value - x_start) / x_step) + 1
     
     #3: Ищем индекс по игреку
-    M = len(npArray[0])
-    y_step = (0 - y_start) / M
+    M = solution.shape[1]
+    y_step = (y_start - y_end) / M
     y =  np.arange(y_start,y_end,y_step)
     y_slice_index = int((y_slice_value - y_start) / y_step) + 1
     
@@ -168,13 +166,13 @@ def draw2DMovie(solution, t_filming_step, x_start, x_end, y_start, legend, solut
     # absolute_solution_maximum = solution_max_value
 
     #Вызываем рисовалку срезов по времени в цикле.
-    for i in range(0, solution.shape[0], t_filming_step):
-        #Если откомментили это, значит вы готовы к мигающему фону. Закомментите инициализацию этих же переменных прямо перед циклом
-        #Нормировка по цвету будет выполняться отдельно для каждого кадра
-        absolute_solution_minimum = np.min(np.min(solution[i]))
-        absolute_solution_maximum = np.max(np.max(solution[i]))
-        draw2DSlice(solution[i], i * t_grid_step,
-                    x_start, x_end, y_start, legend,
+    # Если откомментили это, значит вы готовы к мигающему фону. Закомментите инициализацию этих же переменных прямо перед циклом
+    # Нормировка по цвету будет выполняться отдельно для каждого кадра
+    absolute_solution_minimum = np.min(solution[:, :, :])
+    absolute_solution_maximum = np.max(solution[:, :, :])
+    for i in range(0, solution.shape[2], t_filming_step):
+        draw2DSlice(solution[:,:,i], i * t_grid_step,
+                    x_start, x_end, y_start, y_end, legend,
                     absolute_solution_minimum, absolute_solution_maximum,
                     time_marker_length)
 
@@ -186,8 +184,8 @@ def draw2DMovie(solution, t_filming_step, x_start, x_end, y_start, legend, solut
         images.append(tmp)
     imageio.mimsave('img' + os.sep + legend + ' movie.gif', images, duration = 0.2)
 
-def do_2_postprocess(solution, t_filming_step, x_start, x_end, y_start, legend, solution_min_value, solution_max_value, t_grid_step):
-    draw2DMovie(solution, t_filming_step, x_start, x_end, y_start, legend, solution_min_value, solution_max_value, t_grid_step)
+def do_2_postprocess(solution, t_filming_step, x_start, x_end, y_start, y_end, legend, solution_min_value, solution_max_value, t_grid_step):
+    draw2DMovie(solution, t_filming_step, x_start, x_end, y_start, y_end, legend, solution_min_value, solution_max_value, t_grid_step)
 
 def do_postprocess(solution, t_filming_step, x_start, x_end, legend, t_grid_step):
     draw1DMovie(solution, t_filming_step, x_start, x_end, legend, t_grid_step)
