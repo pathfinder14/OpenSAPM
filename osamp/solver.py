@@ -70,6 +70,7 @@ class Solver:
         self.y_start = problem._y_start
         self.y_end = problem._y_end
         self.spatial_step = problem._x_step
+        self._graph = problem.graph
         # self.time_step = self.cfl*self.spatial_step/self.v_p
         if self._dimension == 1:
             self.solve_1D()
@@ -180,6 +181,11 @@ class Solver:
                                                                                   self.time_step,
                                                                                   self.spatial_step,
                                                                                   grid_prev[:, i, index])
+            elif (self.problem._method == 'McCormack'):
+                for index in self.tension.values():
+                    grid_next[:, i + 1, index] = McCormack.McCormack(grid_prev[:, i, index], self.spatial_step,
+                                                                       lambda_matrix[index][index], self.time_step)
+
             for z in range(grid_next.shape[0]):  # recieve Riman's invariant
                 grid_next[z][i + 1] = np.dot(matrix_inverse, grid_next[z][i + 1])
             if(k == 1):
@@ -201,36 +207,22 @@ class Solver:
 
     def solve_2D(self):
         grid = self._grid
-        # source_of_grid = self.source
-        # # self.time_step = 0.01
-        # # self.spatial_step = 0.1
-        #
-        # # for t in range(1, grid.shape[0]):
-        # ##get only pressure values : array[:, 0]
-        print(2)
         self.source.update_source_in_grid(grid, self._dimension)
-        # for i in range(grid.shape[1] - 1):
-        #     grid[:,i + 1, :] = self.solve_splitted_2D(self.type, grid[:, i, :])
-
         grid = self.solve_splitted_2D()
         print('Result grid shape: ' + str(grid.shape))
-        # list_x = [i * self.problem._y_step for i in range(grid.shape[1])]
-        # plt.plot(list_x, grid[5, :, 5, 2])
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
-        print(grid.shape)
-        list_x = [i * self.problem._x_step for i in range(grid.shape[0])]
-        list_y = [i * self.problem._y_step for i in range(grid.shape[1])]
-        xgrid, ygrid = np.meshgrid(list_x, list_y)
-
-        ax.plot_wireframe(xgrid, ygrid, grid[:, :,80,1])
-        # j = 0
-        # postprocess.do_2_postprocess(grid[:, :, :, j], self.buffering_step,
-        #                              self.x_start, self.x_end, self.y_start, self.y_end, self.problem.type,
-        #                              np.min(np.min(np.min(grid[:, :, :, j]))),
-        #                              np.max(np.max(np.max(grid[:, :, :, j]))),
-        #                              self.time_step)
-        plt.show()
+        j = 1
+        if self._graph == 2:
+            postprocess.do_2_postprocess(grid[:, :, :, j], self.buffering_step,
+                                         self.x_start, self.x_end, self.y_start, self.y_end, self.problem.type,
+                                         np.min(np.min(np.min(grid[:, :, :, j]))),
+                                         np.max(np.max(np.max(grid[:, :, :, j]))),
+                                         self.time_step)
+        else:
+            postprocess.do_3_postprocess(grid[:,:,:,j],self.buffering_step,
+                                         self.x_start, self.x_end, self.y_start, self.y_end, self.problem.type,
+                                         np.min(np.min(np.min(grid[:, :, :, j]))),
+                                         np.max(np.max(np.max(grid[:, :, :, j]))),
+                                         self.time_step)
 
     def _generate_border_conditions(self, grid, time = 0, direction=b.Directions.X):
         if self._dimension == 1:

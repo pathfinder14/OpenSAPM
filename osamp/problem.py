@@ -60,6 +60,7 @@ class Problem(object):
         self._right_boundary_conditions = params['right_boundary_conditions']
         self._force_left = params['force_left']
         self._force_right = params['force_right']
+        self._graph = int(params['graph'])
         self.source = self._produce_source_of_waves()
         if (self.type == 'acoustic') & (self.dimension == 2):
             self.tension = {
@@ -101,6 +102,10 @@ class Problem(object):
     @property
     def grid(self):
         return self._grid
+
+    @property
+    def graph(self):
+        return  self._graph
 
     @property
     def model(self):

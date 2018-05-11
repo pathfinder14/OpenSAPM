@@ -93,7 +93,7 @@ def border_condition_1d_acoustic(grid, type_of_task, border_left, border_right, 
     #
     elif border_left == ConditionNames.ABSORBING_CONDITION:
         for i in range(cells_left - 1, -1, -1):
-                grid_new[i][time] = grid[cells_left - 1 - i][time]
+                grid_new[i][time] = np.zeros(grid_new.shape[2])
 
     elif border_left == ConditionNames.APPLIED_FORCE_CONDITION:
         for i in range(cells_left - 1, -1, -1):
@@ -117,7 +117,7 @@ def border_condition_1d_acoustic(grid, type_of_task, border_left, border_right, 
 
     elif border_right == ConditionNames.ABSORBING_CONDITION:
         for i in range(cells_right - 1, -1, -1):
-            grid_new[i][time] = grid[len(grid) - 1 - i][time]
+            grid_new[i][time] = np.zeros(grid_new.shape[2])
 
     elif border_right == ConditionNames.APPLIED_FORCE_CONDITION:
         for i in range(cells_right - 1, -1, -1):
@@ -160,7 +160,7 @@ def border_condition_2d_acoustic(grid, border_left, border_right, method_name, t
     #
     elif border_left == ConditionNames.ABSORBING_CONDITION:
         for i in range(cells_left - 1, -1, -1):
-            grid_new[i][time] = grid[cells_left - 1 - i][time]
+            grid_new[i][time] = np.zeros(grid.shape[2])
 
     elif border_left == ConditionNames.APPLIED_FORCE_CONDITION:
         for i in range(cells_left - 1, -1, -1):
@@ -189,7 +189,7 @@ def border_condition_2d_acoustic(grid, border_left, border_right, method_name, t
 
     elif border_right == ConditionNames.ABSORBING_CONDITION:
         for i in range(cells_right - 1, -1, -1):
-            grid_new[i][time] = grid[len(grid) - 1 - i][time]
+            grid_new[i][time] = np.zeros(grid.shape[2])
 
     elif border_right == ConditionNames.APPLIED_FORCE_CONDITION:
         for i in range(cells_left - 1, -1, -1):
