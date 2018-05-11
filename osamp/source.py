@@ -15,27 +15,35 @@ class Source:
     """This class is responsible for creating external sources of waves"""
     def __init__(self, type):
         self._type = type
-        self.coordinates = 10
+        self.coordinates_x = 5
+        self.coordinates_y = 5
         self._source = self._get_source_by_type(type)
 
     # TODO: make return valid value
     def _get_source_by_type(self, type):
         return 'Temp source value'
 
-    def _create_spherical_source(self, grid):
+    def _create_spherical_source(self, grid, dimension):
         #TODO delete unnamed constants
-        if grid.shape[1] == 2:
-            grid[self.coordinates] = np.array([100, 20])
-        elif grid.shape[1] == 3:
-            grid[self.coordinates]   = np.array([100, 0, 0])
+        if dimension == 2  and len(grid[0][0][0]) == 3:
+            grid[self.coordinates_x][self.coordinates_y][0] = np.array([10, 0, 0])
+            grid[self.coordinates_x+1][self.coordinates_y][0] = np.array([5, 0, 0])
+            grid[self.coordinates_x-1][self.coordinates_y][0] = np.array([5, 0, 0])
+            grid[self.coordinates_x][self.coordinates_y+1][0] = np.array([5, 0, 0])
+            grid[self.coordinates_x][self.coordinates_y-1][0] = np.array([5, 0, 0])
+            grid[self.coordinates_x- 1][self.coordinates_y - 1][0] = np.array([5, 0, 0])
+            grid[self.coordinates_x + 1][self.coordinates_y - 1][0] = np.array([5, 0, 0])
+            grid[self.coordinates_x - 1][self.coordinates_y +1][0] = np.array([5, 0, 0])
+            grid[self.coordinates_x + 1][self.coordinates_y + 1][0] = np.array([5, 0, 0])
+
+        elif dimension == 1:
+            grid[self.coordinates_x][0] = np.array([100, 20])
         else:
-            grid[self.coordinates]   = np.array([100, 0, 0,0,0])
-        #grid[self.coordinates - 1] = np.array([100*np.cos(15),20*np.cos(15)])
-        #grid[self.coordinates + 1] = np.array([100*np.cos(15),20*np.cos(15)])
+            grid[self.coordinates_x][self.coordinates_y][0] = np.array([10, 0, 0, 0, 0])
         return grid
 
-    def update_source_in_grid(self, grid):
-        return self._create_spherical_source(grid)
+    def update_source_in_grid(self, grid, dimension):
+        return self._create_spherical_source(grid, dimension)
         #grid[self.coordinates] = np.array([1,1])#TODO create real source
 
 

@@ -29,8 +29,9 @@ class SolverMethods:
     KIR = 'kir'
     TVD = 'tvd'
     WENO = 'weno'
+    MCCORMACK = "McCormack"
 
-    cells_for_method = {BIOCOMPACT: (1, 1), LAX_WENDROFF: (3, 3), BEAM_WARMING: (1, 1), KIR: (1, 1), TVD: (1, 1), WENO: (1, 1)}
+    cells_for_method = {BIOCOMPACT: (1, 1), LAX_WENDROFF: (3, 3), BEAM_WARMING: (1, 1), KIR: (1, 1), TVD: (1, 1), WENO: (1, 1),MCCORMACK : (2,2) }
 
     @classmethod
     def get_cells_amount_left(cls, method_name):
@@ -54,7 +55,7 @@ v = 1  # index of velocity (x-component) in values array
 u = 2  # index of velocity (y-component) in values array, only for 2d case
 
 
-def border_condition_1d(grid, type_of_task, border_left, border_right, method_name, force_left=0, force_right=0):
+def border_condition_1d(grid, type_of_task, border_left, border_right, method_name, time, force_left=0, force_right=0):
     """
     Applies border conditions to 'grid' array and returns updated version of it.
     Needs to have 'type_of_task' and 'method_name' specified by a string from 'ProblemTypes' class.
@@ -66,135 +67,135 @@ def border_condition_1d(grid, type_of_task, border_left, border_right, method_na
         - 'force_right' - applied force at the right border
     """
     if type_of_task == ProblemTypes.ACOUSTIC:
-        return border_condition_1d_acoustic(grid, type_of_task, border_left, border_right, method_name, force_left,
+        return border_condition_1d_acoustic(grid, type_of_task, border_left, border_right, method_name, time, force_left,
                                             force_right)
     elif type_of_task == ProblemTypes.SEISMIC:
-        return border_condition_1d_seismic(grid, type_of_task, border_left, border_right, method_name, force_left,
+        return border_condition_1d_seismic(grid, type_of_task, border_left, border_right, method_name, time, force_left,
                                            force_right)
 
 
-def border_condition_1d_acoustic(grid, type_of_task, border_left, border_right, method_name, force_left=0,
+def border_condition_1d_acoustic(grid, type_of_task, border_left, border_right, method_name, time, force_left=0,
                                  force_right=0):
     cells_left = SolverMethods.get_cells_amount_left(method_name)
     cells_right = SolverMethods.get_cells_amount_right(method_name)
-
-    grid_new = np.zeros((cells_left, 2))
+    sizes = [len(grid[0]), len(grid[0][0])]
+    grid_new = np.zeros((cells_left, sizes[0], sizes[1]))
 
     # Check left border.
-
     if border_left == ConditionNames.REFLECTION_CONDITION:
         for i in range(cells_left - 1, -1, -1):
-            grid_new[i][p] = grid[cells_left - 1 - i][p]
-            grid_new[i][v] = -grid[cells_left - 1 - i][v]
+            grid_new[i][time][p] = grid[cells_left - 1 - i][time][p]
+            grid_new[i][time][v] = -grid[cells_left - 1 - i][time][v]
 
     elif border_left == ConditionNames.CYCLE_CONDITION:
         for i in range(cells_left - 1, -1, -1):
-            grid_new[i] = grid[len(grid) - cells_left + i]
+                grid_new[i][time] = grid[len(grid) - cells_left + i][time]
     #
     elif border_left == ConditionNames.ABSORBING_CONDITION:
         for i in range(cells_left - 1, -1, -1):
-            grid_new[i] = grid[cells_left - 1 - i]
+                grid_new[i][time] = np.zeros(grid_new.shape[2])
 
     elif border_left == ConditionNames.APPLIED_FORCE_CONDITION:
         for i in range(cells_left - 1, -1, -1):
-            grid_new[i][v] = grid[cells_left - 1 - i][v]
-            grid_new[i][p] = 2 * force_left - grid[cells_left - 1 - i][p]
+            grid_new[i][time][v] = grid[cells_left - 1 - i][time][v]
+            grid_new[i][time][p] = 2 * force_left - grid[cells_left - 1 - i][time][p]
+
 
     ext_grid = np.concatenate((grid_new, grid), axis=0)
 
-    grid_new = np.zeros((cells_right, 2))
+    grid_new = np.zeros((cells_right, sizes[0], sizes[1]))
 
     # Check right border.
     if border_right == ConditionNames.REFLECTION_CONDITION:
         for i in range(cells_right - 1, -1, -1):
-            grid_new[i][p] = grid[len(grid) - 1 - i][p]
-            grid_new[i][v] = -grid[len(grid) - 1 - i][v]
+                grid_new[i][time][p] = grid[len(grid) - 1 - i][time][p]
+                grid_new[i][time][v] = -grid[len(grid) - 1 - i][time][v]
 
     elif border_right == ConditionNames.CYCLE_CONDITION:
         for i in range(cells_right - 1, -1, -1):
-            grid_new[i] = grid[i]
+            grid_new[i][time] = grid[i][time]
 
     elif border_right == ConditionNames.ABSORBING_CONDITION:
         for i in range(cells_right - 1, -1, -1):
-            grid_new[i] = grid[len(grid) - 1 - i]
+            grid_new[i][time] = np.zeros(grid_new.shape[2])
 
     elif border_right == ConditionNames.APPLIED_FORCE_CONDITION:
         for i in range(cells_right - 1, -1, -1):
-            grid_new[i][v] = grid[len(grid) - 1 - i][v]
-            grid_new[i][p] = 2 * force_right - grid[len(grid) - 1 - i][p]
+            grid_new[i][time][v] = grid[len(grid) - 1 - i][time][v]
+            grid_new[i][time][p] = 2 * force_right - grid[len(grid) - 1 - i][time][p]
 
     ext_grid = np.concatenate((ext_grid, grid_new), axis=0)
     return ext_grid
 
 
-def border_condition_1d_seismic(arr, type_of_task, border_left, border_right, method_name, force_left, force_right):
+def border_condition_1d_seismic(arr, type_of_task, border_left, border_right, method_name, time, force_left, force_right):
     # for 1d seismic and acoustic conditions are the same
-    return border_condition_1d_acoustic(arr, type_of_task, border_left, border_right, method_name, force_left,
+    return border_condition_1d_acoustic(arr, type_of_task, border_left, border_right, method_name, time, force_left,
                                         force_right)
 
 
-def border_condition_2d_acoustic(grid, border_left, border_right, method_name, direction=Directions.X,
+def border_condition_2d_acoustic(grid, border_left, border_right, method_name, time, direction=Directions.X,
                                  force_left=0, force_right=0):
     cells_left = SolverMethods.get_cells_amount_left(method_name)
     cells_right = SolverMethods.get_cells_amount_right(method_name)
 
-    grid_new = np.zeros((cells_left, 3))
+    grid_new = np.zeros((cells_left, grid.shape[1], grid.shape[2]))
 
     # Check left border.
 
     if border_left == ConditionNames.REFLECTION_CONDITION:
         for i in range(cells_left - 1, -1, -1):
             if direction == Directions.X:
-                grid_new[i][v] = -grid[cells_left - 1 - i][v]
-                grid_new[i][u] = grid[cells_left - 1 - i][u]
+                grid_new[i][time][v] = -grid[cells_left - 1 - i][time][v]
+                grid_new[i][time][u] = grid[cells_left - 1 - i][time][u]
             else:
-                grid_new[i][v] = grid[cells_left - 1 - i][v]
-                grid_new[i][u] = -grid[cells_left - 1 - i][u]
-            grid_new[i][p] = grid[cells_left - 1 - i][p]
+                grid_new[i][time][v] = grid[cells_left - 1 - i][time][v]
+                grid_new[i][time][u] = -grid[cells_left - 1 - i][time][u]
+            grid_new[i][time][p] = grid[cells_left - 1 - i][time][p]
 
 
     elif border_left == ConditionNames.CYCLE_CONDITION:
         for i in range(cells_left - 1, -1, -1):
-            grid_new[i] = grid[len(grid) - cells_left + i]
+            grid_new[i][time] = grid[len(grid) - cells_left + i][time]
     #
     elif border_left == ConditionNames.ABSORBING_CONDITION:
         for i in range(cells_left - 1, -1, -1):
-            grid_new[i] = grid[cells_left - 1 - i]
+            grid_new[i][time] = np.zeros(grid.shape[2])
 
     elif border_left == ConditionNames.APPLIED_FORCE_CONDITION:
         for i in range(cells_left - 1, -1, -1):
-            grid_new[i][v] = grid[cells_left - 1 - i][v]
-            grid_new[i][u] = grid[cells_left - 1 - i][u]
-            grid_new[i][p] = 2 * force_left - grid[cells_left - 1 - i][p]
+            grid_new[i][time][v] = grid[cells_left - 1 - i][time][v]
+            grid_new[i][time][u] = grid[cells_left - 1 - i][time][u]
+            grid_new[i][time][p] = 2 * force_left - grid[cells_left - 1 - i][time][p]
 
     ext_grid = np.concatenate((grid_new, grid), axis=0)
 
-    grid_new = np.zeros((cells_right, 3))
+    grid_new = np.zeros((cells_right, grid.shape[1], grid.shape[2]))
 
     # Check right border.
     if border_right == ConditionNames.REFLECTION_CONDITION:
         for i in range(cells_right - 1, -1, -1):
             if direction == Directions.X:
-                grid_new[i][v] = -grid[len(grid) - 1 - i][v]
-                grid_new[i][u] = grid[len(grid) - 1 - i][u]
+                grid_new[i][time][v] = -grid[len(grid) - 1 - i][time][v]
+                grid_new[i][time][u] = grid[len(grid) - 1 - i][time][u]
             else:
-                grid_new[i][v] = grid[len(grid) - 1 - i][v]
-                grid_new[i][u] = -grid[len(grid) - 1 - i][u]
-            grid_new[i][p] = grid[len(grid) - 1 - i][p]
+                grid_new[i][time][v] = grid[len(grid) - 1 - i][time][v]
+                grid_new[i][time][u] = -grid[len(grid) - 1 - i][time][u]
+            grid_new[i][time][p] = grid[len(grid) - 1 - i][time][p]
 
     elif border_right == ConditionNames.CYCLE_CONDITION:
         for i in range(cells_right - 1, -1, -1):
-            grid_new[i] = grid[i]
+            grid_new[i][time] = grid[i][time]
 
     elif border_right == ConditionNames.ABSORBING_CONDITION:
         for i in range(cells_right - 1, -1, -1):
-            grid_new[i] = grid[len(grid) - 1 - i]
+            grid_new[i][time] = np.zeros(grid.shape[2])
 
     elif border_right == ConditionNames.APPLIED_FORCE_CONDITION:
         for i in range(cells_left - 1, -1, -1):
-            grid_new[i][v] = grid[len(grid) - 1 - i][v]
-            grid_new[i][u] = grid[len(grid) - 1 - i][u]
-            grid_new[i][p] = 2 * force_right - grid[len(grid) - 1 - i][p]
+            grid_new[i][time][v] = grid[len(grid) - 1 - i][time][v]
+            grid_new[i][time][u] = grid[len(grid) - 1 - i][time][u]
+            grid_new[i][time][p] = 2 * force_right - grid[len(grid) - 1 - i][time][p]
 
     ext_grid = np.concatenate((ext_grid, grid_new), axis=0)
     return ext_grid
@@ -207,14 +208,14 @@ vx = 3
 vy = 4  # v is already existing
 
 
-def border_condition_2d_seismic(grid, border_left, border_right, method_name, direction=Directions.X, force_left=0,
+def border_condition_2d_seismic(grid, border_left, border_right, method_name, time, direction=Directions.X, force_left=0,
                                 force_right=0):
     """Border condition for 2d seismic equation"""
 
     cells_left = SolverMethods.get_cells_amount_left(method_name)
     cells_right = SolverMethods.get_cells_amount_right(method_name)
 
-    grid_new = np.zeros((cells_left, 5))
+    grid_new = np.zeros((cells_left, grid.shape[0], grid.shape[1]))
 
     if direction == Directions.X:
         s_main = s11
@@ -233,62 +234,62 @@ def border_condition_2d_seismic(grid, border_left, border_right, method_name, di
     # Check left border.
     if border_left == ConditionNames.REFLECTION_CONDITION:
         for i in range(cells_left - 1, -1, -1):
-            grid_new[i][s11] = grid[cells_left - 1 - i][s11]
-            grid_new[i][s22] = grid[cells_left - 1 - i][s22]
-            grid_new[i][s12] = grid[cells_left - 1 - i][s12]
-            grid_new[i][v_main] = -grid[cells_left - 1 - i][v_main]
-            grid_new[i][v_extra] = grid[cells_left - 1 - i][v_extra]
+            grid_new[i][time][s11] = grid[cells_left - 1 - i][time][s11]
+            grid_new[i][time][s22] = grid[cells_left - 1 - i][time][s22]
+            grid_new[i][time][s12] = grid[cells_left - 1 - i][time][s12]
+            grid_new[i][time][v_main] = -grid[cells_left - 1 - i][time][v_main]
+            grid_new[i][time][v_extra] = grid[cells_left - 1 - i][time][v_extra]
 
     elif border_left == ConditionNames.CYCLE_CONDITION:
         for i in range(cells_left - 1, -1, -1):
-            grid_new[i] = grid[len(grid) - cells_left + i]
+            grid_new[i][time] = grid[len(grid) - cells_left + i][time]
     #
     elif border_left == ConditionNames.ABSORBING_CONDITION:
         for i in range(cells_left - 1, -1, -1):
-            grid_new[i] = grid[cells_left - 1 - i]
+            grid_new[i][time] = grid[cells_left - 1 - i][time]
 
     elif border_left == ConditionNames.APPLIED_FORCE_CONDITION:
         for i in range(cells_left - 1, -1, -1):
-            grid_new[i][s_main] = 2 * force_left - grid[cells_left - 1 - i][s_main]
-            grid_new[i][s12] = 2 * force_left - grid[cells_left - 1 - i][s12]
-            grid_new[i][s_extra] = grid[cells_left - 1 - i][s_extra]
-            grid_new[i][vx] = grid[cells_left - 1 - i][vx]
-            grid_new[i][vy] = grid[cells_left - 1 - i][vy]
+            grid_new[i][time][s_main] = 2 * force_left - grid[cells_left - 1 - i][time][s_main]
+            grid_new[i][time][s12] = 2 * force_left - grid[cells_left - 1 - i][time][s12]
+            grid_new[i][time][s_extra] = grid[cells_left - 1 - i][time][s_extra]
+            grid_new[i][time][vx] = grid[cells_left - 1 - i][time][vx]
+            grid_new[i][time][vy] = grid[cells_left - 1 - i][time][vy]
 
     ext_grid = np.concatenate((grid_new, grid), axis=0)
 
-    grid_new = np.zeros((cells_right, 5))
+    grid_new = np.zeros((cells_right, grid.shape[0], grid.shape[1]))
 
     # Check right border.
     if border_right == ConditionNames.REFLECTION_CONDITION:
         for i in range(cells_right - 1, -1, -1):
-            grid_new[i][s11] = grid[len(grid) - 1 - i][s11]
-            grid_new[i][s22] = grid[len(grid) - 1 - i][s22]
-            grid_new[i][s12] = grid[len(grid) - 1 - i][s12]
-            grid_new[i][v_main] = -grid[len(grid) - 1 - i][v_main]
-            grid_new[i][v_extra] = grid[len(grid) - 1 - i][v_extra]
+            grid_new[i][time][s11] = grid[len(grid) - 1 - i][time][s11]
+            grid_new[i][time][s22] = grid[len(grid) - 1 - i][time][s22]
+            grid_new[i][time][s12] = grid[len(grid) - 1 - i][time][s12]
+            grid_new[i][time][v_main] = -grid[len(grid) - 1 - i][time][v_main]
+            grid_new[i][time][v_extra] = grid[len(grid) - 1 - i][time][v_extra]
 
     elif border_right == ConditionNames.CYCLE_CONDITION:
         for i in range(cells_right - 1, -1, -1):
-            grid_new[i] = grid[i]
+            grid_new[i][time] = grid[i][time]
 
     elif border_right == ConditionNames.ABSORBING_CONDITION:
         for i in range(cells_right - 1, -1, -1):
-            grid_new[i] = grid[len(grid) - 1 - i]
+            grid_new[i][time] = grid[len(grid) - 1 - i][time]
 
     elif border_right == ConditionNames.APPLIED_FORCE_CONDITION:
         for i in range(cells_left - 1, -1, -1):
-            grid_new[i][s_main] = 2 * force_right - grid[len(grid) - 1 - i][s_main]
-            grid_new[i][s12] = 2 * force_right - grid[len(grid) - 1 - i][s12]
-            grid_new[i][s_extra] = grid[len(grid) - 1 - i][s_extra]
-            grid_new[i][vx] = grid[len(grid) - 1 - i][vx]
-            grid_new[i][vy] = grid[len(grid) - 1 - i][vy]
+            grid_new[i][time][s_main] = 2 * force_right - grid[len(grid) - 1 - i][time][s_main]
+            grid_new[i][time][s12] = 2 * force_right - grid[len(grid) - 1 - i][time][s12]
+            grid_new[i][time][s_extra] = grid[len(grid) - 1 - i][time][s_extra]
+            grid_new[i][time][vx] = grid[len(grid) - 1 - i][time][vx]
+            grid_new[i][time][vy] = grid[len(grid) - 1 - i][time][vy]
 
     ext_grid = np.concatenate((ext_grid, grid_new), axis=0)
     return ext_grid
 
 
-def border_condition_2d(grid, type_of_task, border_left, border_right, method_name, direction=Directions.X,
+def border_condition_2d(grid, type_of_task, border_left, border_right, method_name, time, direction=Directions.X,
                         force_left=0, force_right=0):
     """
     Applies border conditions to 'grid' array and returns updated version of it.
@@ -299,10 +300,10 @@ def border_condition_2d(grid, type_of_task, border_left, border_right, method_na
         - 'force_top' - applied force at the top. according to the formulation of the problem, force can be applied only at the top
     """
     if type_of_task == ProblemTypes.ACOUSTIC:
-        return border_condition_2d_acoustic(grid, border_left, border_right, method_name, direction, force_left,
+        return border_condition_2d_acoustic(grid, border_left, border_right, method_name, time, direction, force_left,
                                             force_right)
     elif type_of_task == ProblemTypes.SEISMIC:
-        return border_condition_2d_seismic(grid, border_left, border_right, method_name, direction, force_left,
+        return border_condition_2d_seismic(grid, border_left, border_right, method_name, time, direction, force_left,
                                            force_right)
 
 # print border_condition_2d([[0, 1, 2, 3, 4], [1, 2, 3, 4, 5], [2, 3, 4, 4, 5], [4, 5, 5, 5, 5], [5, 6, 6, 7, 7

@@ -50,7 +50,7 @@ def get_acoustic2D_eign_matrix(_k, density, n):
     return np.array([[-np.sqrt(_k*density), 0, np.sqrt(_k*density)], [n[0], n[1], n[0]], [n[1], n[0], n[1]]])
 
 def get_acoustic2D_inv_eign_matrix(_k, density, n):
-    N = n[0]^2 - n[1]^2
+    N = n[0]**2 - n[1]**2
     return np.array([[-1/(2*np.sqrt(_k*density)), n[0]/(2*N), -n[1]/(2*N)],[0, -n[1]/(2*N), n[0]/(2*N)], [-1/(2*np.sqrt(_k*density)), n[0]/(2*N), -n[1]/(2*N)]])
 
 def get_acoustic1D_matrix(_k, density):
@@ -78,13 +78,13 @@ def get_matrix(dim, type, environment_properties, x=15, y=15):
         else:
             return get_seismic2d_matrix(environment_properties.lambda_lame, environment_properties.mu_lame, environment_properties.density)
 
-def get_eign_matrix(dim, type, environment_properties, x=15, y=15):
+def get_eign_matrix(dim, type, environment_properties, n):
     if type == 'acoustic':
         if dim == 1:
             # TODO: clarify what value should be passed as the third parameter
-            return get_acoustic1D_eign_matrix(environment_properties.elasticity_quotient, environment_properties.density,  1)
+            return get_acoustic1D_eign_matrix(environment_properties.elasticity_quotient, environment_properties.density, n[0])
         else:
-            return get_acoustic2D_eign_matrix(environment_properties.elasticity_quotient, environment_properties.density, [1, 1, 1])
+            return get_acoustic2D_eign_matrix(environment_properties.elasticity_quotient, environment_properties.density, n)
 
     if type == 'seismic':
         if dim == 1:
@@ -94,20 +94,43 @@ def get_eign_matrix(dim, type, environment_properties, x=15, y=15):
             return get_seismic2d_eign_matrix(environment_properties.lambda_lame, environment_properties.mu_lame, environment_properties.density, [1, 1])
 
 
-def get_inv_eign_matrix(dim, type, environment_properties, x=15, y=15):
+def get_inv_eign_matrix(dim, type, environment_properties, n):
     if type == 'acoustic':
         if dim == 1:
-            return get_acoustic1D_inv_eign_matrix(environment_properties.elasticity_quotient, environment_properties.density, 1)
+            return get_acoustic1D_inv_eign_matrix(environment_properties.elasticity_quotient, environment_properties.density, n[0])
         else:
-            return get_acoustic2D_inv_eign_matrix(environment_properties.elasticity_quotient, environment_properties.density, [1, 1, 1])
+            return get_acoustic2D_inv_eign_matrix(environment_properties.elasticity_quotient, environment_properties.density, n)
 
     if type == 'seismic':
         if dim == 1:
             return get_seismic1d_inv_eign_matrix(environment_properties.mu_lame, environment_properties.density)
         else:
             # TODO: implement method get_seismic2d_inv_eign_matrix and replace the following with it
-            return get_seismic2d_inv_eign_matrix(environment_properties.lambda_lame, environment_properties.mu_lame, environment_properties.density, [1, 1])
+            return get_seismic2d_inv_eign_matrix(environment_properties.lambda_lame, environment_properties.mu_lame, environment_properties.density, n)
+
+# only if dimension > 1
+def get_omega_a_matrix(type, environment_properties):
+    # TODO create acoustic case
+    if type == 'acoustic':
+        return  1 / 2 * np.transpose(np.array([[-1 / np.sqrt(environment_properties.density * environment_properties.elasticity_quotient), 0, 1 / np.sqrt(environment_properties.density * environment_properties.elasticity_quotient)],
+                                              [1, 0, 1],
+                                              [0, 2, 0]]))
 
 
+def get_lambda_ab_matrix(type, environment_properties):
+    # TODO create seistic case
+    if type == 'acoustic':
+        return np.diag(np.array([-np.sqrt(environment_properties.elasticity_quotient / environment_properties.density ),0,  np.sqrt(environment_properties.elasticity_quotient / environment_properties.density )]))
+
+def get_omega_b_matrix(type, environment_properties):
+    # TODO create seistic case
+    if type == 'acoustic':
+        return 1 / 2 * np.transpose(np.array([[-1 / np.sqrt(
+            environment_properties.density * environment_properties.elasticity_quotient), 0, 1 / np.sqrt(
+            environment_properties.density * environment_properties.elasticity_quotient)],
+                                              [0, 2, 0],
+                                              [1, 0, 1]]))
+def inverse_matrix(matrix):
+    return np.linalg.inv(matrix)
 def calculate_params_for_acoustic():
     pass
